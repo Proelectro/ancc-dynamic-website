@@ -70,10 +70,12 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   `https/app/.git-credentials-<kerberos>`, mode 600) and runs `deploy/iitd/deploy.sh update`. On the server `deploy.sh`
   auto-detects `/var/www/ancc` and runs locally (no SSH); `--noproxy` is used to reach the site itself. Tested on a replica.
 - The server has `https_proxy=http://henna.iitd.ac.in:3128` set, and reaches GitHub through it. rsync, openssl, htpasswd exist.
-- `https/html/` was recreated on 12 Nov by editor **cs1240924** as `cs1240924:cs124 755`, so other editors can't write
-  in it. They must run `chgrp ancc .../html && chmod 2775 .../html` before `/new/` can be created (`check` prints this).
-- `deploy.sh check` tests PHP, rewrites and Basic Auth on the server. **Unverified on the real box:** whether CSC's
-  AllowOverride permits RewriteRule and AuthType in `.htaccess`. If not, ask CSC for `AllowOverride FileInfo AuthConfig`.
+- `https/html/` is owned by editor **cs1240924**; on 24 Nov they made it `ancc` group, mode 2775, so other editors can write in it.
+  If an editor's `check` ever says html isn't writable, the owner runs `chgrp ancc .../html && chmod 2775 .../html`.
+- **Verified on the real box (24 Nov):** PHP 8.4.27 under Apache, `.htaccess` RewriteRule and Basic Auth both work,
+  MySQL socket at `/var/run/mysqld/mysqld.sock`, PHP CLI 8.5.12.
+- **Live since 24 Nov 2026:** `https://ancc.iitd.ac.in/new/` (preview user `ancc`; password known to editors only).
+  Deployed from `/var/www/ancc/https/app/src-me1230384`. To update: push to `main`, wait for CI, then `deploy/iitd/deploy.sh update` there.
 - If the earlier Python version was ever deployed there, `deploy.sh reset-db` clears the old tables (preview data only).
 - Going public later: get IITD OAuth from CSC → in config.php set `ENV=production` and `AUTH_MODE=iitd` and add the OAuth keys,
   deploy with `ANCC_PREVIEW=0`, then run `bin/create-superadmin.php`. The OAuth URLs and field names in `Config.php`/`IitdOAuth.php` are guesses to confirm with CSC.
@@ -109,8 +111,8 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - **Done:** Phase 0 (setup, CI, layouts) and Phase 1 (dev login + IITD OAuth skeleton, JWT/refresh cookies, profile and
   onboarding, dashboard shell, admin users list/detail with roles and deactivate, audit log). 26 PHPUnit tests. Deploy kit tested on
   a local replica of the server (Apache mod_php, .htaccess, Basic Auth, MySQL 8).
-- **Pushed to GitHub** on 24 Nov 2026. **Not yet done:** fixing `html/` permissions (cs1240924), `deploy.sh check/setup/deploy`
-  on the real server, the IITD OAuth request to CSC.
+- **Pushed to GitHub and deployed** to `https://ancc.iitd.ac.in/new/` (preview mode) on 24 Nov 2026.
+  **Not yet done:** the IITD OAuth request to CSC.
 - **Next: Phase 2, Events.** Event CRUD and admin editor (sections in plan §1.7), form builder (`EventFormField`), dynamic
   registration with validation/capacity/waitlist, events list/detail pages, my registrations, CSV export, links with
   visibility/reveal_at, ECA templates and CAIC points-table fields on the event (used in Phase 3).
