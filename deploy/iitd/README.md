@@ -11,8 +11,9 @@ The CSC server is shared Apache hosting with PHP and MySQL 8, with no sudo. The 
 
 API calls take a few milliseconds, because Apache runs PHP directly.
 
-While IITD login (OAuth) isn't approved yet, the app runs in **preview mode**: dev login is on, so the
-whole of `/new/` is behind a **preview password** that only editors know.
+While IITD login (OAuth) isn't approved yet, dev login is on. `/new/` can sit behind a **preview password**
+(`preview on`) or be open (`preview off`); a normal deploy keeps whichever is set. With it open, anyone who
+can reach `/new/` can use dev login as any user, so keep only test data there until IITD login works.
 
 ## How a change reaches the server
 
@@ -81,6 +82,8 @@ Other commands (run from the clone):
 | Command | What it does |
 |---|---|
 | `deploy/iitd/deploy.sh password` | Change the preview password |
+| `deploy/iitd/deploy.sh preview off` | Remove the preview password and redeploy (`/new/` opens for anyone on the IITD network) |
+| `deploy/iitd/deploy.sh preview on` | Add a preview password back and redeploy |
 | `deploy/iitd/deploy.sh logs` | Show the end of Apache's error log (start here when something breaks) |
 | `deploy/iitd/deploy.sh check` | Re-test the server setup |
 | `deploy/iitd/deploy.sh reset-db` | Delete all tables and recreate them (asks you to type RESET) |
@@ -139,6 +142,6 @@ When CSC approves IITD OAuth:
 | `ANCC_HOST` | `local` on the server, else `ancc` | SSH host (alias from `~/.ssh/config`), or `local` |
 | `ANCC_URL` | `https://ancc.iitd.ac.in` | Public URL |
 | `ANCC_SUBDIR` | `new` | App path under the URL |
-| `ANCC_PREVIEW` | `1` | `1` = password-protect the app |
+| `ANCC_PREVIEW` | `auto` | `1` = password-protect the app, `0` = open, `auto` = protect if a preview password exists |
 | `ANCC_REMOTE_PHP` | `php` | PHP command on the server |
 | `ANCC_CURL_OPTS` | *(empty)* | Extra curl options for the checks (used for testing) |

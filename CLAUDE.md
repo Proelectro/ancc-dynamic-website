@@ -27,7 +27,7 @@ backend/   public/index.php (local entry) · src/{App,Config,Db,Migrator,Users,A
            src/Controllers (Auth, User, Dashboard, AdminUser, Health) · src/Http (Request/Response/Router/HttpError)
            src/Support (Kerberos, Roles, Lists=hostels, Validate, Uuid) · migrations/NNN_*.sql · bin/*.php · tests/ (PHPUnit)
 frontend/  src/{api,hooks/queries.ts,components,layouts,pages,lib} · router.tsx (basename from VITE_BASE)
-deploy/iitd/  deploy.sh (check|setup|deploy|update|password|logs|reset-db) + templates + README.md
+deploy/iitd/  deploy.sh (check|setup|deploy|update|password|preview off/on|logs|reset-db) + templates + README.md
 docs/plan.md  full spec · .github/ CI + CODEOWNERS
 ```
 
@@ -63,7 +63,10 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - The **old static site** (from GitHub Pages) lives in `https/html/` (index.html, team*.html, etc.). Don't touch it.
 - New app, **preview mode**: `https://ancc.iitd.ac.in/new/` → `https/html/new/` (React build + `.htaccess` + `api.php`).
   Code goes in `https/app/backend/`, config in `https/app/config.php` (written by `deploy.sh setup` from the README; mode 640),
-  and the preview Basic Auth password file in `https/app/.htpasswd`. ENV=staging with dev login on, so the whole `/new/` is password-protected.
+  and the optional preview Basic Auth password file in `https/app/.htpasswd`. ENV=staging with dev login on.
+  **The user turned the preview password off (24 Nov)**: `deploy.sh preview off` deletes `.htpasswd` and deploys without
+  it; a plain deploy keeps the current state; `preview on` restores it. So anyone on the IITD network can use dev login
+  as any user: keep only test data there until IITD OAuth is live.
 - **Deploys run on the server itself.** CI (`.github/workflows/ci.yml`, job `deploy-branch`) builds every push to `main`
   into the **`deploy` branch** (repo + `frontend/dist/` built for `/new/`), because the server's Node 18 can't build
   Tailwind 4. Each editor clones that branch to `https/app/src-<kerberos>` with a read-only fine-grained token (stored in
@@ -74,7 +77,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   If an editor's `check` ever says html isn't writable, the owner runs `chgrp ancc .../html && chmod 2775 .../html`.
 - **Verified on the real box (24 Nov):** PHP 8.4.27 under Apache, `.htaccess` RewriteRule and Basic Auth both work,
   MySQL socket at `/var/run/mysqld/mysqld.sock`, PHP CLI 8.5.12.
-- **Live since 24 Nov 2026:** `https://ancc.iitd.ac.in/new/` (preview user `ancc`; password known to editors only).
+- **Live since 24 Nov 2026:** `https://ancc.iitd.ac.in/new/` (no preview password; see above).
   Deployed from `/var/www/ancc/https/app/src-me1230384`. To update: push to `main`, wait for CI, then `deploy/iitd/deploy.sh update` there.
 - If the earlier Python version was ever deployed there, `deploy.sh reset-db` clears the old tables (preview data only).
 - Going public later: get IITD OAuth from CSC → in config.php set `ENV=production` and `AUTH_MODE=iitd` and add the OAuth keys,
@@ -91,6 +94,12 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - Never commit `backend/config.php`, the server's config, `.htpasswd`, or anything from `/var/www/ancc/README`.
 
 ## Product decisions (user's comments on the plan; details in docs/plan.md)
+
+- **Scope change (24 Nov 2026):** event **registration** and **ECA/CAIC** already exist elsewhere, so we don't build them
+  (plan §1.3 registration, §1.4 ECA/CAIC, §1.7 form builder are dropped; GitHub issue #3 removes their placeholders).
+  We keep an **event highlights** page (write-up, results, Drive photos, link to external registration), **prizes and
+  reimbursements** (prizes now added by finance, not from our event results), ICPC, About, and a new **alumni outreach** page.
+  The ECA/CAIC bullets below are kept only as history.
 
 - **Dashboard order:** Profile on top, then ECA, CAIC, Prizes & reimbursements, ICPC, My events.
 - **ECA** = a list of achievements (bullet records like "Secured 1st in Code Decode"), **no numbers**.
@@ -113,10 +122,9 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   a local replica of the server (Apache mod_php, .htaccess, Basic Auth, MySQL 8).
 - **Pushed to GitHub and deployed** to `https://ancc.iitd.ac.in/new/` (preview mode) on 24 Nov 2026.
   **Not yet done:** the IITD OAuth request to CSC.
-- **Next: Phase 2, Events.** Event CRUD and admin editor (sections in plan §1.7), form builder (`EventFormField`), dynamic
-  registration with validation/capacity/waitlist, events list/detail pages, my registrations, CSV export, links with
-  visibility/reveal_at, ECA templates and CAIC points-table fields on the event (used in Phase 3).
-- Then Phase 3 (ECA/CAIC), 4 (payouts), 5 (ICPC), 6 (results, Drive photos, About), 7 (notifications, audit UI).
+- **Roadmap = GitHub issue #15** (checklist of issues #1–#14): IITD OAuth, go public, scope cleanup, event highlights,
+  prizes and reimbursements, ICPC, About + sponsor, alumni outreach, polish, launch at root, branch protection, DB backups,
+  editor deploy access, the old GitHub Pages site. Check the issues for current status.
 
 ## Working with the user
 
