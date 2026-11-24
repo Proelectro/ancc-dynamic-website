@@ -1,0 +1,6 @@
+# Every change needs approval from proelectro before it can merge to main.
+# Also enable in GitHub → Settings → Branches → main:
+#   - Require a pull request + "Require review from Code Owners"
+#   - Require status checks: backend, frontend
+#   - Restrict who can push to matching branches: proelectro
+*   @proelectro

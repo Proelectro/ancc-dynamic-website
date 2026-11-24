@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ancc_test
+          MYSQL_USER: ancc
+          MYSQL_PASSWORD: ancc
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd "mysqladmin ping -proot" --health-interval 5s --health-timeout 5s --health-retries 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4" # same as Apache on the IITD server
+          extensions: pdo_mysql, curl, mbstring
+      - run: composer install --no-interaction --no-progress
+      - run: find src bin public tests -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+      - run: vendor/bin/phpunit
+        env:
+          ANCC_DB_HOST: 127.0.0.1
+          ANCC_DB_USER: ancc
+          ANCC_DB_PASSWORD: ancc
+          ANCC_DB_NAME: ancc_test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  # After the tests pass on main: build the frontend for https://ancc.iitd.ac.in/new/ and commit the
+  # repo plus the built files to the "deploy" branch. The IITD server has Node 18 (too old for the
+  # Tailwind 4 build), so it pulls this branch instead of building. See deploy/iitd/README.md.
+  deploy-branch:
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: deploy-branch
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build the frontend for /new/
+        working-directory: frontend
+        run: |
+          npm ci
+          VITE_BASE=/new/ npm run build
+          echo "/new/" > dist/.ancc-base
+          echo "$GITHUB_SHA" > dist/.ancc-source
+      - name: Commit to the deploy branch
+        run: |
+          set -euo pipefail
+          export GIT_INDEX_FILE="$RUNNER_TEMP/deploy-index"
+          git add -A .              # the repo as on main (.gitignore keeps node_modules out)
+          git add -f frontend/dist  # plus the built frontend
+          tree="$(git write-tree)"
+          parent=()
+          if git fetch --depth 1 origin deploy 2>/dev/null; then
+            if [ "$(git rev-parse 'FETCH_HEAD^{tree}')" = "$tree" ]; then
+              echo "deploy branch already has this build"; exit 0
+            fi
+            parent=(-p FETCH_HEAD)
+          fi
+          commit="$(GIT_AUTHOR_NAME='github-actions[bot]' GIT_AUTHOR_EMAIL='41898283+github-actions[bot]@users.noreply.github.com' \
+            GIT_COMMITTER_NAME='github-actions[bot]' GIT_COMMITTER_EMAIL='41898283+github-actions[bot]@users.noreply.github.com' \
+            git commit-tree "$tree" "${parent[@]}" -m "Build of main@${GITHUB_SHA::7}")"
+          git push origin "$commit:refs/heads/deploy"

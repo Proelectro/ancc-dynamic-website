@@ -1,0 +1,18 @@
+# PHP backend
+backend/vendor/
+backend/config.php
+backend/.phpunit.result.cache
+backend/.phpunit.cache/
+
+# Node
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Deploy build output
+build/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
