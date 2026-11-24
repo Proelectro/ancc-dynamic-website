@@ -84,12 +84,13 @@ backend/
 ## Deploying to ancc.iitd.ac.in
 
 The app runs on the IITD CSC server as a password-protected preview at **https://ancc.iitd.ac.in/new/**.
-From the repo root, on the IITD network/VPN:
+CI builds every push to `main` into the `deploy` branch; the server pulls that branch. On the server, from
+its clone (`/var/www/ancc/https/app/src-<kerberos>`):
 
 ```bash
-deploy/iitd/deploy.sh check   # once
-deploy/iitd/deploy.sh setup   # once
-deploy/iitd/deploy.sh         # every update
+deploy/iitd/deploy.sh check    # once
+deploy/iitd/deploy.sh setup    # once
+deploy/iitd/deploy.sh update   # every update: pull the latest build and deploy it
 ```
 
 Full guide: [`deploy/iitd/README.md`](deploy/iitd/README.md).

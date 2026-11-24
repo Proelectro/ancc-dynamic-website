@@ -27,7 +27,7 @@ backend/   public/index.php (local entry) · src/{App,Config,Db,Migrator,Users,A
            src/Controllers (Auth, User, Dashboard, AdminUser, Health) · src/Http (Request/Response/Router/HttpError)
            src/Support (Kerberos, Roles, Lists=hostels, Validate, Uuid) · migrations/NNN_*.sql · bin/*.php · tests/ (PHPUnit)
 frontend/  src/{api,hooks/queries.ts,components,layouts,pages,lib} · router.tsx (basename from VITE_BASE)
-deploy/iitd/  deploy.sh (check|setup|deploy|password|logs|reset-db) + templates + README.md
+deploy/iitd/  deploy.sh (check|setup|deploy|update|password|logs|reset-db) + templates + README.md
 docs/plan.md  full spec · .github/ CI + CODEOWNERS
 ```
 
@@ -64,6 +64,14 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - New app, **preview mode**: `https://ancc.iitd.ac.in/new/` → `https/html/new/` (React build + `.htaccess` + `api.php`).
   Code goes in `https/app/backend/`, config in `https/app/config.php` (written by `deploy.sh setup` from the README; mode 640),
   and the preview Basic Auth password file in `https/app/.htpasswd`. ENV=staging with dev login on, so the whole `/new/` is password-protected.
+- **Deploys run on the server itself.** CI (`.github/workflows/ci.yml`, job `deploy-branch`) builds every push to `main`
+  into the **`deploy` branch** (repo + `frontend/dist/` built for `/new/`), because the server's Node 18 can't build
+  Tailwind 4. Each editor clones that branch to `https/app/src-<kerberos>` with a read-only fine-grained token (stored in
+  `https/app/.git-credentials-<kerberos>`, mode 600) and runs `deploy/iitd/deploy.sh update`. On the server `deploy.sh`
+  auto-detects `/var/www/ancc` and runs locally (no SSH); `--noproxy` is used to reach the site itself. Tested on a replica.
+- The server has `https_proxy=http://henna.iitd.ac.in:3128` set, and reaches GitHub through it. rsync, openssl, htpasswd exist.
+- `https/html/` was recreated on 12 Nov by editor **cs1240924** as `cs1240924:cs124 755`, so other editors can't write
+  in it. They must run `chgrp ancc .../html && chmod 2775 .../html` before `/new/` can be created (`check` prints this).
 - `deploy.sh check` tests PHP, rewrites and Basic Auth on the server. **Unverified on the real box:** whether CSC's
   AllowOverride permits RewriteRule and AuthType in `.htaccess`. If not, ask CSC for `AllowOverride FileInfo AuthConfig`.
 - If the earlier Python version was ever deployed there, `deploy.sh reset-db` clears the old tables (preview data only).
@@ -101,7 +109,8 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - **Done:** Phase 0 (setup, CI, layouts) and Phase 1 (dev login + IITD OAuth skeleton, JWT/refresh cookies, profile and
   onboarding, dashboard shell, admin users list/detail with roles and deactivate, audit log). 26 PHPUnit tests. Deploy kit tested on
   a local replica of the server (Apache mod_php, .htaccess, Basic Auth, MySQL 8).
-- **Not yet done by the user:** first `git push`, `deploy.sh check/setup/deploy` on the real server, the IITD OAuth request to CSC.
+- **Pushed to GitHub** on 24 Nov 2026. **Not yet done:** fixing `html/` permissions (cs1240924), `deploy.sh check/setup/deploy`
+  on the real server, the IITD OAuth request to CSC.
 - **Next: Phase 2, Events.** Event CRUD and admin editor (sections in plan §1.7), form builder (`EventFormField`), dynamic
   registration with validation/capacity/waitlist, events list/detail pages, my registrations, CSV export, links with
   visibility/reveal_at, ECA templates and CAIC points-table fields on the event (used in Phase 3).
@@ -111,5 +120,5 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 
 - Keep replies concise; render math in LaTeX if any comes up.
 - The user is on Windows and setting up an **Ubuntu dual boot** (WSL failed with `E_UNEXPECTED`/`REGDB_E_CLASSNOTREG`).
-  `deploy.sh` needs bash and rsync, so it runs from Ubuntu or macOS.
+  So deploys run on the server over SSH (Windows OpenSSH is enough), not from the laptop.
 - Prefer showing something running (screenshots, tests) over long plans. Ask before big direction changes.
