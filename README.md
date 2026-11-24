@@ -5,7 +5,7 @@ Website for the **Algorithm and Coding Club (ANCC), IIT Delhi**: events, ECA/CAI
 - `backend/`: PHP 8.2+ JSON API (no framework, no runtime dependencies) on MySQL 8
 - `frontend/`: React + TypeScript + Vite + Tailwind + TanStack Query
 - `deploy/iitd/`: one script to publish to `ancc.iitd.ac.in`
-- The full design is in the project plan (`plan.md`).
+- The full design is in [`docs/plan.md`](docs/plan.md); context for AI-assisted work is in [`CLAUDE.md`](CLAUDE.md).
 
 Why PHP: the IITD CSC server is shared Apache hosting with PHP built in. A PHP API answers in a few
 milliseconds there, while a Python app could only run as a CGI script (about 0.7 s per request).
