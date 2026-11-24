@@ -10,6 +10,7 @@
 #   deploy/iitd/deploy.sh            # build and upload the app (same as "deploy")
 #   deploy/iitd/deploy.sh update     # on the server: git pull the deploy branch, then deploy
 #   deploy/iitd/deploy.sh password   # change the preview password
+#   deploy/iitd/deploy.sh preview off|on  # remove / add the preview password, then deploy
 #   deploy/iitd/deploy.sh logs       # show the last lines of Apache's error log
 #   deploy/iitd/deploy.sh reset-db   # drop ALL tables and recreate them (asks first)
 #
@@ -28,7 +29,7 @@ fi
 URL="${ANCC_URL:-https://ancc.iitd.ac.in}"        # public URL of the site
 SUBDIR="${ANCC_SUBDIR:-new}"                      # app lives at $URL/$SUBDIR/
 REMOTE_PHP="${ANCC_REMOTE_PHP:-php}"              # PHP command-line binary on the server
-PREVIEW="${ANCC_PREVIEW:-1}"                      # 1 = password-protect the app (dev login is on)
+PREVIEW="${ANCC_PREVIEW:-auto}"                   # 1 = password-protect the app, 0 = open; auto = on if a preview password exists
 SITE=/var/www/ancc/https
 APP="$SITE/app"
 BASE="/$SUBDIR"
@@ -241,7 +242,7 @@ chgrp ancc "$APP/config.php" 2>/dev/null || true
 chmod 640 "$APP/config.php"
 echo "   created $APP/config.php (mode 640, group ancc)"
 REMOTE
-  if [ "$PREVIEW" = "1" ]; then
+  if [ "$PREVIEW" != "0" ]; then
     if remote "test -f $APP/.htpasswd"; then
       say "Preview password already set (change it with: deploy/iitd/deploy.sh password)"
     else
@@ -294,6 +295,9 @@ build() {
 cmd_deploy() {
   connect
   remote "test -f $APP/config.php" || die "Run 'deploy/iitd/deploy.sh setup' first."
+  if [ "$PREVIEW" = "auto" ]; then
+    if remote "test -f $APP/.htpasswd"; then PREVIEW=1; else PREVIEW=0; fi
+  fi
   if [ "$PREVIEW" = "1" ]; then
     remote "test -f $APP/.htpasswd" || die "No preview password yet. Run: deploy/iitd/deploy.sh password"
   fi
@@ -329,7 +333,10 @@ REMOTE
   local code; code="$(http_code "$URL$BASE/")"
   case "$code" in
     401) say "Deployed. $URL$BASE/ is up and asks for the preview password (HTTP 401, as expected)." ;;
-    200) say "Deployed. $URL$BASE/ is up (HTTP 200)." ;;
+    200) say "Deployed. $URL$BASE/ is up (HTTP 200, no preview password)."
+      if remote "grep -q \"'AUTH_MODE' => 'dev'\" $APP/config.php"; then
+        warn "Dev login is on: anyone who can open $URL$BASE/ can log in as any user, including admins. Test data only."
+      fi ;;
     *) warn "Uploaded, but $URL$BASE/ returned HTTP $code. Check: deploy/iitd/deploy.sh logs" ;;
   esac
 }
@@ -342,6 +349,22 @@ cmd_update() {
   git -C "$ROOT" pull --ff-only --quiet || die "git pull failed (see above)."
   say "Now at: $(git -C "$ROOT" log -1 --format='%s (%cr)')"
   exec "$0" deploy  # run the freshly pulled version of this script
+}
+
+cmd_preview() {
+  case "${1:-}" in
+    off)
+      connect
+      remote "rm -f $APP/.htpasswd"
+      say "Preview password removed."
+      PREVIEW=0; cmd_deploy ;;
+    on)
+      connect
+      say "Choose the preview username/password editors will use to open $URL$BASE/"
+      set_password
+      PREVIEW=1; cmd_deploy ;;
+    *) die "Use: deploy/iitd/deploy.sh preview off   (or: preview on)" ;;
+  esac
 }
 
 cmd_reset_db() {
@@ -365,8 +388,9 @@ case "${1:-deploy}" in
   deploy) cmd_deploy ;;
   update) cmd_update ;;
   password) connect && set_password ;;
+  preview) cmd_preview "${2:-}" ;;
   logs) cmd_logs "${2:-40}" ;;
   reset-db) cmd_reset_db ;;
-  -h | --help | help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//' ;;
-  *) die "Unknown command '$1'. Try: check, setup, deploy, update, password, logs, reset-db" ;;
+  -h | --help | help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) die "Unknown command '$1'. Try: check, setup, deploy, update, password, preview, logs, reset-db" ;;
 esac
