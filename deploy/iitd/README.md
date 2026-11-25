@@ -119,8 +119,9 @@ repo root on `main`: `deploy/iitd/deploy.sh check`, `setup`, and `deploy/iitd/de
 
 ## Going public (later)
 
-When the IITD OAuth administrator (Mr. Gopal Krishan, see https://oauth2.iitd.ac.in/client_config.php) has
-registered our app with redirect URI `https://ancc.iitd.ac.in/new/api/v1/auth/callback`:
+When the IITD OAuth administrators (webgroup@cc.iitd.ac.in, see https://oauth2.iitd.ac.in/client_config.php) have
+registered our app. Its redirect URI is `https://ancc.iitd.ac.in/api/v1/auth/callback` (the root address); while the
+app is under `/new/`, `deploy` adds `html/api/.htaccess`, which forwards only that URL to `/new/`.
 
 1. Edit `/var/www/ancc/https/app/config.php` on the server: set `'ENV' => 'production'`, `'AUTH_MODE' => 'iitd'`,
    `'IITD_OAUTH_CLIENT_ID' => '...'` and `'IITD_OAUTH_CLIENT_SECRET' => '...'`.
