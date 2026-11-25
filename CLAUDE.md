@@ -74,7 +74,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   `https/app/.git-credentials-<kerberos>`, mode 600) and runs `deploy/iitd/deploy.sh update`. On the server `deploy.sh`
   auto-detects `/var/www/ancc` and runs locally (no SSH); `--noproxy` is used to reach the site itself. Tested on a replica.
 - The server has `https_proxy=http://henna.iitd.ac.in:3128` set, and reaches GitHub through it. rsync, openssl, htpasswd exist.
-- `https/html/` is owned by editor **cs1240924**; on 24 Nov they made it `ancc` group, mode 2775, so other editors can write in it.
+- `https/html/` is owned by another editor; on 24 Nov they made it `ancc` group, mode 2775, so other editors can write in it.
   If an editor's `check` ever says html isn't writable, the owner runs `chgrp ancc .../html && chmod 2775 .../html`.
 - **Verified on the real box (24 Nov):** PHP 8.4.27 under Apache, `.htaccess` RewriteRule (and Basic Auth) work,
   MySQL socket at `/var/run/mysqld/mysqld.sock`, PHP CLI 8.5.12.
