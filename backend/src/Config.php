@@ -16,7 +16,7 @@ final class Config
 
     /** @var array<string, mixed> */
     private const DEFAULTS = [
-        // development = your machine, staging = password-protected preview on the server,
+        // development = your machine, staging = the server before IITD login is live,
         // production = the real site (IITD login only).
         'ENV' => 'development',
         'AUTH_MODE' => 'dev', // dev | iitd

@@ -27,7 +27,7 @@ backend/   public/index.php (local entry) · src/{App,Config,Db,Migrator,Users,A
            src/Controllers (Auth, User, Dashboard, AdminUser, Health) · src/Http (Request/Response/Router/HttpError)
            src/Support (Kerberos, Roles, Lists=hostels, Validate, Uuid) · migrations/NNN_*.sql · bin/*.php · tests/ (PHPUnit)
 frontend/  src/{api,hooks/queries.ts,components,layouts,pages,lib} · router.tsx (basename from VITE_BASE)
-deploy/iitd/  deploy.sh (check|setup|deploy|update|password|preview off/on|logs|reset-db) + templates + README.md
+deploy/iitd/  deploy.sh (check|setup|deploy|update|logs|reset-db) + templates + README.md
 docs/plan.md  full spec · .github/ CI + CODEOWNERS
 ```
 
@@ -61,12 +61,10 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - `/var/www/ancc/` (root:ancc, 750) holds `README` (CSC's notes with the MySQL credentials; never copy them anywhere), `apache-logs/{access,error}.log`,
   and `https/` (group-writable, not web-served) containing `html/` (web root) and `cgi-bin/`.
 - The **old static site** (from GitHub Pages) lives in `https/html/` (index.html, team*.html, etc.). Don't touch it.
-- New app, **preview mode**: `https://ancc.iitd.ac.in/new/` → `https/html/new/` (React build + `.htaccess` + `api.php`).
-  Code goes in `https/app/backend/`, config in `https/app/config.php` (written by `deploy.sh setup` from the README; mode 640),
-  and the optional preview Basic Auth password file in `https/app/.htpasswd`. ENV=staging with dev login on.
-  **The user turned the preview password off (24 Nov)**: `deploy.sh preview off` deletes `.htpasswd` and deploys without
-  it; a plain deploy keeps the current state; `preview on` restores it. So anyone on the IITD network can use dev login
-  as any user: keep only test data there until IITD OAuth is live.
+- New app: `https://ancc.iitd.ac.in/new/` → `https/html/new/` (React build + `.htaccess` + `api.php`).
+  Code goes in `https/app/backend/`, config in `https/app/config.php` (written by `deploy.sh setup` from the README; mode 640).
+  ENV=staging with dev login on. **No preview password**: the user had the feature removed entirely (25 Nov), since there's
+  no real data yet. Anyone on the IITD network can use dev login as any user, so keep only test data until IITD OAuth is live.
 - **Deploys run on the server itself.** CI (`.github/workflows/ci.yml`, job `deploy-branch`) builds every push to `main`
   into the **`deploy` branch** (repo + `frontend/dist/` built for `/new/`), because the server's Node 18 can't build
   Tailwind 4. Each editor clones that branch to `https/app/src-<kerberos>` with a read-only fine-grained token (stored in
@@ -75,13 +73,13 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - The server has `https_proxy=http://henna.iitd.ac.in:3128` set, and reaches GitHub through it. rsync, openssl, htpasswd exist.
 - `https/html/` is owned by editor **cs1240924**; on 24 Nov they made it `ancc` group, mode 2775, so other editors can write in it.
   If an editor's `check` ever says html isn't writable, the owner runs `chgrp ancc .../html && chmod 2775 .../html`.
-- **Verified on the real box (24 Nov):** PHP 8.4.27 under Apache, `.htaccess` RewriteRule and Basic Auth both work,
+- **Verified on the real box (24 Nov):** PHP 8.4.27 under Apache, `.htaccess` RewriteRule (and Basic Auth) work,
   MySQL socket at `/var/run/mysqld/mysqld.sock`, PHP CLI 8.5.12.
-- **Live since 24 Nov 2026:** `https://ancc.iitd.ac.in/new/` (no preview password; see above).
+- **Live since 24 Nov 2026:** `https://ancc.iitd.ac.in/new/` (open, no password; see above).
   Deployed from `/var/www/ancc/https/app/src-me1230384`. To update: push to `main`, wait for CI, then `deploy/iitd/deploy.sh update` there.
 - If the earlier Python version was ever deployed there, `deploy.sh reset-db` clears the old tables (preview data only).
 - Going public later: get IITD OAuth from CSC → in config.php set `ENV=production` and `AUTH_MODE=iitd` and add the OAuth keys,
-  deploy with `ANCC_PREVIEW=0`, then run `bin/create-superadmin.php`. The OAuth URLs and field names in `Config.php`/`IitdOAuth.php` are guesses to confirm with CSC.
+  deploy, then run `bin/create-superadmin.php`. The OAuth URLs and field names in `Config.php`/`IitdOAuth.php` are guesses to confirm with CSC.
 - Shared hosting has **no background jobs**: do "scheduled" work lazily on request, via admin buttons, or with cron if CSC allows it.
 
 ## Git workflow (current)
@@ -91,7 +89,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - Later: a ruleset requiring a PR plus Code Owner review. Caveat: Claude's GitHub identity is **Proelectro**, the only code
   owner, and nobody can approve their own PR. So add a second code owner, or give proelectro "pull requests only" bypass.
 - Commit messages end with the attribution lines the session provides (Co-Authored-By / Claude-Session).
-- Never commit `backend/config.php`, the server's config, `.htpasswd`, or anything from `/var/www/ancc/README`.
+- Never commit `backend/config.php`, the server's config, or anything from `/var/www/ancc/README`.
 
 ## Product decisions (user's comments on the plan; details in docs/plan.md)
 
@@ -119,8 +117,8 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 
 - **Done:** Phase 0 (setup, CI, layouts) and Phase 1 (dev login + IITD OAuth skeleton, JWT/refresh cookies, profile and
   onboarding, dashboard shell, admin users list/detail with roles and deactivate, audit log). 26 PHPUnit tests. Deploy kit tested on
-  a local replica of the server (Apache mod_php, .htaccess, Basic Auth, MySQL 8).
-- **Pushed to GitHub and deployed** to `https://ancc.iitd.ac.in/new/` (preview mode) on 24 Nov 2026.
+  a local replica of the server (Apache mod_php, .htaccess, MySQL 8).
+- **Pushed to GitHub and deployed** to `https://ancc.iitd.ac.in/new/` on 24 Nov 2026.
   **Not yet done:** the IITD OAuth request to CSC.
 - **Roadmap = GitHub issue #15** (checklist of issues #1–#14): IITD OAuth, go public, scope cleanup, event highlights,
   prizes and reimbursements, ICPC, About + sponsor, alumni outreach, polish, launch at root, branch protection, DB backups,
