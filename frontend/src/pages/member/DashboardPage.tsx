@@ -1,9 +1,10 @@
-import { AlertTriangle, Gift, Pencil, Trophy, User as UserIcon } from "lucide-react";
+import { AlertTriangle, Pencil, User as UserIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import type { User } from "@/api/client";
 import { Badge, Card, CardHeader, Skeleton, buttonStyles } from "@/components/ui";
+import { dashboardCards } from "@/features/registry";
 import { useDashboard } from "@/hooks/queries";
 import { PageHeader } from "@/layouts/Layouts";
 import { ROLE_LABELS, type Role } from "@/lib/roles";
@@ -43,20 +44,16 @@ export function DashboardPage() {
 
       <ProfileCard user={p} />
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <StubCard
-          icon={<Gift size={16} />}
-          title="Prizes & reimbursements"
-          phase={data.payouts.phase}
-          body="Each prize or claim with its step: bank details → professor approval → accounts (≈21 days) → done."
-        />
-        <StubCard
-          icon={<Trophy size={16} />}
-          title="ICPC team"
-          phase={data.icpc.phase}
-          body="Create a team, invite 2 teammates, fill your icpc.global details and follow your team's status."
-        />
-      </div>
+      {dashboardCards.length > 0 && (
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {/* Cards come from each feature's module.tsx (dashboardCards). */}
+          {dashboardCards.map((c) => (
+            <div key={c.id} className={c.wide ? "md:col-span-2" : undefined}>
+              {c.element}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -114,24 +111,3 @@ function ProfileCard({ user }: { user: User }) {
 }
 
 const Missing = () => <span className="text-warn">Not added</span>;
-
-function StubCard({
-  icon,
-  title,
-  phase,
-  body,
-  className,
-}: {
-  icon: ReactNode;
-  title: string;
-  phase: string;
-  body: string;
-  className?: string;
-}) {
-  return (
-    <Card className={className}>
-      <CardHeader title={title} icon={icon} action={<Badge>{phase}</Badge>} />
-      <p className="px-5 py-4 text-sm text-muted">{body}</p>
-    </Card>
-  );
-}

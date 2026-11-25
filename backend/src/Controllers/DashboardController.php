@@ -15,7 +15,10 @@ final class DashboardController
     {
     }
 
-    /** Everything the dashboard needs in one request. Sections not built yet say which phase adds them. */
+    /**
+     * The profile part of the dashboard. Features show their own dashboard cards and fetch their own
+     * data (see frontend/src/features), so new features don't need to change this endpoint.
+     */
     public function show(Request $request): Response
     {
         $user = $this->app->requireUser($request);
@@ -25,12 +28,9 @@ final class DashboardController
                 $missing[] = $label;
             }
         }
-        $stub = static fn (string $phase) => ['available' => false, 'phase' => $phase];
         return Response::json([
             'profile' => Users::out($user),
             'profile_missing' => $missing,
-            'payouts' => $stub('Soon'),
-            'icpc' => $stub('Soon'),
         ]);
     }
 }

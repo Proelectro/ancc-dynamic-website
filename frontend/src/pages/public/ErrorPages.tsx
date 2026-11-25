@@ -1,7 +1,8 @@
 import { Construction } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-import { buttonStyles } from "@/components/ui";
+import { Badge, buttonStyles, Card, CardHeader } from "@/components/ui";
 
 function Message({ code, title, body }: { code: string; title: string; body: string }) {
   return (
@@ -24,7 +25,8 @@ export const ForbiddenPage = () => (
   <Message code="403" title="No access" body="Your account doesn't have the role needed for this page." />
 );
 
-export function ComingSoon({ title, phase, what }: { title: string; phase: string; what: string }) {
+/** Placeholder for a page whose feature isn't built yet. */
+export function ComingSoon({ title, phase = "coming soon", what }: { title: string; phase?: string; what: string }) {
   return (
     <div className="rounded-xl border border-dashed border-border bg-surface px-6 py-14 text-center">
       <Construction className="mx-auto text-muted" size={28} />
@@ -35,10 +37,20 @@ export function ComingSoon({ title, phase, what }: { title: string; phase: strin
   );
 }
 
-export function ComingSoonPage(props: { title: string; phase: string; what: string }) {
+export function ComingSoonPage(props: { title: string; phase?: string; what: string }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <ComingSoon {...props} />
     </div>
+  );
+}
+
+/** Placeholder card for the member dashboard (see DashboardCard in src/features/registry.ts). */
+export function ComingSoonCard({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+  return (
+    <Card>
+      <CardHeader title={title} icon={icon} action={<Badge>Soon</Badge>} />
+      <p className="px-5 py-4 text-sm text-muted">{body}</p>
+    </Card>
   );
 }

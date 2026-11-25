@@ -29,17 +29,9 @@ export interface UserList {
   page_size: number;
 }
 
-/** A dashboard section whose feature isn't built yet. */
-export interface SectionStub {
-  available: boolean;
-  phase: string;
-}
-
 export interface Dashboard {
   profile: User;
   profile_missing: string[];
-  payouts: SectionStub;
-  icpc: SectionStub;
 }
 
 /** Fields a member may edit. Empty string clears a field. */

@@ -51,6 +51,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
       - run: npm run build
 
   # After the tests pass on main: build the frontend for https://ancc.iitd.ac.in/new/ and commit the
