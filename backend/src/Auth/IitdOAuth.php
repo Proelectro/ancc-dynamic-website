@@ -8,9 +8,9 @@ use Ancc\Config;
 use RuntimeException;
 
 /**
- * IITD OAuth 2.0 (authorization-code flow).
- * The endpoint URLs and the field names in the profile response must be confirmed with CSC when
- * the club registers its OAuth client. Everything is configurable in config.php.
+ * IITD OAuth 2.0 (authorization-code flow), as documented at https://oauth2.iitd.ac.in/client_config.php:
+ * authorize.php → our callback gets ?code → token.php (client_id, client_secret, grant_type, code)
+ * → resource.php (access_token) returns user_id, mail, name, uniqueiitdid, category, department.
  */
 final class IitdOAuth
 {
@@ -20,23 +20,21 @@ final class IitdOAuth
 
     public function authorizeUrl(string $state): string
     {
-        return $this->config->str('IITD_OAUTH_AUTHORIZE_URL') . '?' . http_build_query([
+        return $this->config->str('IITD_OAUTH_AUTHORIZE_URL') . '?' . http_build_query($this->withRedirect([
             'response_type' => 'code',
             'client_id' => $this->config->str('IITD_OAUTH_CLIENT_ID'),
-            'redirect_uri' => $this->config->str('IITD_OAUTH_REDIRECT_URI'),
             'state' => $state,
-        ]);
+        ]));
     }
 
     public function exchangeCode(string $code): string
     {
-        $data = $this->post($this->config->str('IITD_OAUTH_TOKEN_URL'), [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $this->config->str('IITD_OAUTH_REDIRECT_URI'),
+        $data = $this->post($this->config->str('IITD_OAUTH_TOKEN_URL'), $this->withRedirect([
             'client_id' => $this->config->str('IITD_OAUTH_CLIENT_ID'),
             'client_secret' => $this->config->str('IITD_OAUTH_CLIENT_SECRET'),
-        ]);
+            'grant_type' => 'authorization_code',
+            'code' => $code,
+        ]));
         $token = $data['access_token'] ?? null;
         if (!is_string($token) || $token === '') {
             throw new RuntimeException('No access_token in IITD response');
@@ -47,17 +45,30 @@ final class IitdOAuth
     public function fetchIdentity(string $accessToken): Identity
     {
         $data = $this->post($this->config->str('IITD_OAUTH_RESOURCE_URL'), ['access_token' => $accessToken]);
-        // Field names to confirm with CSC. We accept a few likely spellings.
-        $kid = $data['user_id'] ?? $data['uniqueiitdid'] ?? $data['kerberos'] ?? $data['username'] ?? null;
-        if (!is_string($kid) || $kid === '') {
-            throw new RuntimeException('IITD response has no kerberos ID');
+        // user_id is the kerberos ID (IITD's own example uses it as the login id).
+        $kid = $data['user_id'] ?? null;
+        if (!is_string($kid) || trim($kid) === '') {
+            throw new RuntimeException('IITD response has no user_id');
         }
+        $kid = strtolower(trim($kid));
+        $str = static fn (string $k): ?string => is_string($data[$k] ?? null) && trim($data[$k]) !== '' ? trim($data[$k]) : null;
         return new Identity(
             $kid,
-            is_string($data['name'] ?? null) ? $data['name'] : $kid,
-            is_string($data['email'] ?? null) ? $data['email'] : "$kid@iitd.ac.in",
-            is_string($data['department'] ?? null) ? $data['department'] : null,
+            $str('name') ?? $kid,
+            $str('mail') ?? "$kid@iitd.ac.in",
+            $str('department'),
         );
+    }
+
+    /**
+     * Adds redirect_uri only if one is configured (IITD normally uses the registered one).
+     * @param array<string, string> $fields
+     * @return array<string, string>
+     */
+    private function withRedirect(array $fields): array
+    {
+        $uri = $this->config->str('IITD_OAUTH_REDIRECT_URI');
+        return $uri === '' ? $fields : $fields + ['redirect_uri' => $uri];
     }
 
     /**

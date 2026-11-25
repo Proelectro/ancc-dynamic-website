@@ -37,13 +37,15 @@ final class Config
         'REFRESH_TOKEN_DAYS' => 7,
         'COOKIE_SECURE' => false,
 
-        // IITD OAuth: confirm these endpoints and the response fields with CSC.
+        // IITD OAuth (https://oauth2.iitd.ac.in/client_config.php). The client ID and secret come from
+        // the OAuth administrator, who also registers our redirect URI. Leave REDIRECT_URI empty: IITD
+        // uses the registered one, and its docs don't send it.
         'IITD_OAUTH_CLIENT_ID' => '',
         'IITD_OAUTH_CLIENT_SECRET' => '',
-        'IITD_OAUTH_AUTHORIZE_URL' => 'https://oauth.iitd.ac.in/authorize.php',
-        'IITD_OAUTH_TOKEN_URL' => 'https://oauth.iitd.ac.in/token.php',
-        'IITD_OAUTH_RESOURCE_URL' => 'https://oauth.iitd.ac.in/resource.php',
-        'IITD_OAUTH_REDIRECT_URI' => 'http://localhost:8000/api/v1/auth/callback',
+        'IITD_OAUTH_AUTHORIZE_URL' => 'https://oauth2.iitd.ac.in/authorize.php',
+        'IITD_OAUTH_TOKEN_URL' => 'https://oauth2.iitd.ac.in/token.php',
+        'IITD_OAUTH_RESOURCE_URL' => 'https://oauth2.iitd.ac.in/resource.php',
+        'IITD_OAUTH_REDIRECT_URI' => '',
     ];
 
     /** @param array<string, mixed> $values */

@@ -58,7 +58,7 @@ The coach (the ANCC faculty in-charge) does not need a role on the site. The ICP
 
 #### Production: IITD OAuth (Kerberos-backed)
 
-IIT Delhi provides an OAuth 2.0 server (`oauth.iitd.ac.in`). The club must register an OAuth client with CSC/IITD to get a `client_id` and `client_secret`.
+IIT Delhi provides an OAuth 2.0 server (`oauth2.iitd.ac.in`; docs at https://oauth2.iitd.ac.in/client_config.php). The club must register an OAuth client with CSC/IITD to get a `client_id` and `client_secret`.
 
 **Flow:**
 

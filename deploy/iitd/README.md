@@ -119,10 +119,11 @@ repo root on `main`: `deploy/iitd/deploy.sh check`, `setup`, and `deploy/iitd/de
 
 ## Going public (later)
 
-When CSC approves IITD OAuth:
+When the IITD OAuth administrator (Mr. Gopal Krishan, see https://oauth2.iitd.ac.in/client_config.php) has
+registered our app with redirect URI `https://ancc.iitd.ac.in/new/api/v1/auth/callback`:
 
-1. Edit `/var/www/ancc/https/app/config.php` on the server: set `'ENV' => 'production'`, `'AUTH_MODE' => 'iitd'`
-   and add the three `IITD_OAUTH_*` values (the comment at the top of the file lists them).
+1. Edit `/var/www/ancc/https/app/config.php` on the server: set `'ENV' => 'production'`, `'AUTH_MODE' => 'iitd'`,
+   `'IITD_OAUTH_CLIENT_ID' => '...'` and `'IITD_OAUTH_CLIENT_SECRET' => '...'`.
 2. Deploy: `deploy/iitd/deploy.sh update` (from the server clone). Dev login is now off.
 3. Make the first admin: `ssh ancc`, then
    `cd /var/www/ancc/https/app/backend && ANCC_CONFIG=../config.php php bin/create-superadmin.php <kerberos-id>`.
