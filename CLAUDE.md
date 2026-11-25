@@ -79,14 +79,17 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   Deployed from `/var/www/ancc/https/app/src-me1230384`. To update: push to `main`, wait for CI, then `deploy/iitd/deploy.sh update` there.
 - If the earlier Python version was ever deployed there, `deploy.sh reset-db` clears the old tables (preview data only).
 - **IITD OAuth** (documented at https://oauth2.iitd.ac.in/client_config.php): email **webgroup@cc.iitd.ac.in** (Mr. Gopal Krishan /
-  Dr. Manish Agarwal) with Client Name, Server URI (`https://ancc.iitd.ac.in`) and Redirect URI (`https://ancc.iitd.ac.in/new/api/v1/auth/callback`);
-  he returns `client_id` + `client_secret`. Flow: `authorize.php` → callback `?code` → `token.php` (POST client_id,
+  Dr. Manish Agarwal). **Requested 25 Nov 2026** (by Pritesh) with Client Name "ANCC website", Server URI `https://ancc.iitd.ac.in`
+  and Redirect URI **`https://ancc.iitd.ac.in/api/v1/auth/callback`** (the root address, not `/new/`). Until the app moves to the
+  root, `deploy.sh` writes `html/api/.htaccess` that 302-forwards only that path to `/new/api/v1/auth/callback` (the state
+  cookie is scoped to `/new`, so the callback must land there). Remove `html/api/` when launching at the root. They return
+  `client_id` + `client_secret`. Flow: `authorize.php` → callback `?code` → `token.php` (POST client_id,
   client_secret, grant_type, code) → `resource.php` (POST access_token) → `user_id` (= kerberos), `mail`, `name`,
   `uniqueiitdid`, `category`, `department`. `IitdOAuth.php` follows this; `redirect_uri` is not sent unless configured.
   **Open question:** one docs page says `oauth2.iitd.ac.in`, another `oauth.iitd.ac.in`; the code defaults to `oauth2`. Asked in the
   request email; if it's `oauth`, set the three `IITD_OAUTH_*_URL` values in the server's config.php (no code change).
 - Going public later: in config.php set `ENV=production`, `AUTH_MODE=iitd`, `IITD_OAUTH_CLIENT_ID/SECRET`, deploy, then run
-  `bin/create-superadmin.php`. The redirect URI must be re-registered when the app moves from `/new/` to the root.
+  `bin/create-superadmin.php`. The registered redirect URI already points at the root, so moving there needs no change at IITD.
 - Shared hosting has **no background jobs**: do "scheduled" work lazily on request, via admin buttons, or with cron if CSC allows it.
 
 ## Git workflow (current)
@@ -126,7 +129,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   onboarding, dashboard shell, admin users list/detail with roles and deactivate, audit log). 26 PHPUnit tests. Deploy kit tested on
   a local replica of the server (Apache mod_php, .htaccess, MySQL 8).
 - **Pushed to GitHub and deployed** to `https://ancc.iitd.ac.in/new/` on 24 Nov 2026.
-  **Not yet done:** the IITD OAuth request to CSC.
+  **Waiting on:** IITD's reply to the OAuth request (sent 25 Nov) with client_id/secret and oauth vs oauth2.
 - **Roadmap = GitHub issue #15** (checklist of issues #1–#14): IITD OAuth, go public, scope cleanup, event highlights,
   prizes and reimbursements, ICPC, About + sponsor, alumni outreach, polish, launch at root, branch protection, DB backups,
   editor deploy access, the old GitHub Pages site. Check the issues for current status.
