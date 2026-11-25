@@ -145,8 +145,8 @@ $config = [
 ];
 $out = "<?php\n// ANCC settings on the IITD server. Keep private: holds the database password.\n"
     . "// When IITD OAuth is approved: ENV => 'production', AUTH_MODE => 'iitd', and add\n"
-    . "// IITD_OAUTH_CLIENT_ID, IITD_OAUTH_CLIENT_SECRET and\n"
-    . "// IITD_OAUTH_REDIRECT_URI => '" . $url . $base . "/api/v1/auth/callback'.\n"
+    . "// IITD_OAUTH_CLIENT_ID and IITD_OAUTH_CLIENT_SECRET (from the IITD OAuth administrator, who\n"
+    . "// registers our redirect URI " . $url . $base . "/api/v1/auth/callback).\n"
     . 'return ' . var_export($config, true) . ";\n";
 file_put_contents($path, $out);
 PHP

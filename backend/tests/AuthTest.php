@@ -122,7 +122,7 @@ final class AuthTest extends ApiTestCase
 
         $r = $client->request('GET', '/api/v1/auth/login');
         $this->assertSame(302, $r->status);
-        $this->assertStringStartsWith('https://oauth.iitd.ac.in/authorize.php?', $r->headers['Location']);
+        $this->assertStringStartsWith('https://oauth2.iitd.ac.in/authorize.php?', $r->headers['Location']);
         $this->assertStringContainsString('state=', $r->headers['Location']);
         $this->assertArrayHasKey('ancc_oauth_state', $client->cookies);
     }
