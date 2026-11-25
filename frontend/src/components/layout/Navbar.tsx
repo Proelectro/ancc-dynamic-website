@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import { AnccMark } from "@/components/brand/AnccMark";
 import { buttonStyles } from "@/components/ui";
 import { useLogout, useMe } from "@/hooks/queries";
 import { isAdmin } from "@/lib/roles";
@@ -16,10 +17,9 @@ const NAV = [
 
 export function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2 font-mono text-sm font-bold tracking-tight">
-      <span className="grid h-7 w-7 place-items-center rounded-md bg-fg text-[11px] text-bg">&lt;/&gt;</span>
-      <span>ANCC</span>
-      <span className="hidden font-normal text-muted sm:inline">· IIT Delhi</span>
+    <Link to="/" className="flex items-center gap-3 text-fg" aria-label="ANCC home">
+      <AnccMark className="h-5 w-auto" />
+      <span className="hidden border-l border-border pl-3 font-mono text-xs text-muted sm:inline">IIT Delhi</span>
     </Link>
   );
 }

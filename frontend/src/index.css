@@ -19,18 +19,25 @@
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
   --color-danger: var(--danger);
+  --color-brand: var(--brand);
+  --color-brand-slate: var(--brand-slate);
 }
 
+/* ANCC palette (from the club logo): slate #373D4B, orange #DF6C36, white.
+   --brand is the exact logo orange (logo, highlights); --accent is a slightly deeper orange
+   for text and buttons on light backgrounds so small text stays readable (WCAG AA). */
 :root {
-  --bg: #f7f8fa;
+  --brand: #df6c36;
+  --brand-slate: #373d4b;
+  --bg: #f6f6f8;
   --surface: #ffffff;
-  --surface-2: #f1f3f6;
-  --border: #e2e5ea;
-  --fg: #0f172a;
-  --muted: #5b6474;
-  --accent: #047857;
+  --surface-2: #eff0f3;
+  --border: #dfe2e8;
+  --fg: #373d4b;
+  --muted: #636a78;
+  --accent: #c2541f;
   --accent-fg: #ffffff;
-  --accent-soft: #e6f4ee;
+  --accent-soft: #fbece4;
   --warn: #92400e;
   --warn-soft: #fef3c7;
   --danger: #b91c1c;
@@ -39,17 +46,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b0f17;
-    --surface: #121826;
-    --surface-2: #1a2232;
-    --border: #253047;
-    --fg: #e6e9ef;
-    --muted: #94a0b4;
-    --accent: #34d399;
-    --accent-fg: #052e1f;
-    --accent-soft: #10291f;
+    --bg: #2e333f;
+    --surface: #373d4b;
+    --surface-2: #414858;
+    --border: #4b5365;
+    --fg: #f4f5f7;
+    --muted: #aeb4c0;
+    --accent: #f08a55;
+    --accent-fg: #1d2029;
+    --accent-soft: #4a3d39;
     --warn: #fcd34d;
-    --warn-soft: #2f2410;
+    --warn-soft: #4a4230;
     --danger: #f87171;
     color-scheme: dark;
   }
