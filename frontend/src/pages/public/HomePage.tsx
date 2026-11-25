@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, Code2, Trophy } from "lucide-react";
+import { ArrowRight, CalendarDays, Gift, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { buttonStyles, Card } from "@/components/ui";
@@ -8,7 +8,7 @@ const PILLARS = [
   {
     icon: <CalendarDays size={18} />,
     title: "Contests & workshops",
-    body: "Weekly contests, lecture series and workshops. Register, get links and see results in one place.",
+    body: "Weekly contests, lecture series and workshops, with highlights, results and photos from each one.",
   },
   {
     icon: <Trophy size={18} />,
@@ -16,9 +16,9 @@ const PILLARS = [
     body: "Form your team, follow the step-by-step icpc.global guide and track your team from prelims to regionals.",
   },
   {
-    icon: <Code2 size={18} />,
-    title: "Your record",
-    body: "ECA records, your CAIC Trophy score for your hostel, and prizes and reimbursements, tracked step by step.",
+    icon: <Gift size={18} />,
+    title: "Prizes & reimbursements",
+    body: "Track every prize and reimbursement claim step by step, from bank details to payment.",
   },
 ];
 

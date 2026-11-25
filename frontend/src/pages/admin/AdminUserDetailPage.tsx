@@ -116,9 +116,9 @@ export function AdminUserDetailPage() {
 
         <div className="lg:col-span-2">
           <ComingSoon
-            title="ECA records, CAIC score, payouts and ICPC team"
-            phase="Phases 3–5"
-            what="Add or revoke ECA records and CAIC entries for this student and see their prizes, reimbursements and ICPC team here."
+            title="Prizes, reimbursements and ICPC team"
+            phase="coming soon"
+            what="See this student's prizes, reimbursements and ICPC team here."
           />
         </div>
 

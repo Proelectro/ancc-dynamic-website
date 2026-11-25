@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, Gift, ListChecks, Medal, Pencil, Trophy, User as UserIcon } from "lucide-react";
+import { AlertTriangle, Gift, Pencil, Trophy, User as UserIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
@@ -45,18 +45,6 @@ export function DashboardPage() {
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <StubCard
-          icon={<ListChecks size={16} />}
-          title="ECA records"
-          phase={data.eca.phase}
-          body="A bullet list of your achievements and participation, like “Secured 1st position in Code Decode”."
-        />
-        <StubCard
-          icon={<Medal size={16} />}
-          title="CAIC score"
-          phase={data.caic.phase}
-          body="Points you earned for your hostel in ANCC events towards the CAIC Trophy, with a per-event breakdown."
-        />
-        <StubCard
           icon={<Gift size={16} />}
           title="Prizes & reimbursements"
           phase={data.payouts.phase}
@@ -67,13 +55,6 @@ export function DashboardPage() {
           title="ICPC team"
           phase={data.icpc.phase}
           body="Create a team, invite 2 teammates, fill your icpc.global details and follow your team's status."
-        />
-        <StubCard
-          icon={<CalendarDays size={16} />}
-          title="My events"
-          phase={data.events.phase}
-          body="Events you registered for, with countdowns, contest links and results."
-          className="md:col-span-2"
         />
       </div>
     </div>

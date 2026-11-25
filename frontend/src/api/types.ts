@@ -38,11 +38,8 @@ export interface SectionStub {
 export interface Dashboard {
   profile: User;
   profile_missing: string[];
-  eca: SectionStub;
-  caic: SectionStub;
   payouts: SectionStub;
   icpc: SectionStub;
-  events: SectionStub;
 }
 
 /** Fields a member may edit. Empty string clears a field. */

@@ -30,7 +30,7 @@ export function ComingSoon({ title, phase, what }: { title: string; phase: strin
       <Construction className="mx-auto text-muted" size={28} />
       <h1 className="mt-3 text-lg font-semibold">{title}</h1>
       <p className="mx-auto mt-1 max-w-md text-sm text-muted">{what}</p>
-      <p className="mt-4 font-mono text-xs text-accent">coming in {phase}</p>
+      <p className="mt-4 font-mono text-xs text-accent">{phase}</p>
     </div>
   );
 }

@@ -25,8 +25,8 @@ export const router = createBrowserRouter([
         element: (
           <ComingSoonPage
             title="Events"
-            phase="Phase 2"
-            what="Upcoming, ongoing and past events with registration forms, contest links, results and photos."
+            phase="coming soon"
+            what="Highlights from our contests and workshops: write-ups, results and photos, with a link to wherever registration happens."
           />
         ),
       },
@@ -35,7 +35,7 @@ export const router = createBrowserRouter([
         element: (
           <ComingSoonPage
             title="About ANCC"
-            phase="Phase 6"
+            phase="coming soon"
             what="The club, our mission, the team by year, and our sponsor Jump Trading."
           />
         ),
@@ -53,17 +53,12 @@ export const router = createBrowserRouter([
       { path: "/dashboard", element: <DashboardPage /> },
       { path: "/profile", element: <ProfilePage /> },
       {
-        path: "/dashboard/eca-caic",
-        element: soon("ECA & CAIC", "Phase 3", "Your full ECA list and CAIC breakdown by year."),
-      },
-      { path: "/dashboard/events", element: soon("My events", "Phase 2", "Events you registered for.") },
-      {
         path: "/dashboard/payouts",
-        element: soon("Prizes & reimbursements", "Phase 4", "Track each prize and claim step by step."),
+        element: soon("Prizes & reimbursements", "coming soon", "Track each prize and claim step by step."),
       },
       {
         path: "/icpc",
-        element: soon("ICPC", "Phase 5", "Team formation, your icpc.global details and the registration guide."),
+        element: soon("ICPC", "coming soon", "Team formation, your icpc.global details and the registration guide."),
       },
     ],
   },
@@ -79,10 +74,10 @@ export const router = createBrowserRouter([
       { path: "/admin", element: <AdminUsersPage /> },
       { path: "/admin/users", element: <AdminUsersPage /> },
       { path: "/admin/users/:id", element: <AdminUserDetailPage /> },
-      { path: "/admin/events", element: soon("Events admin", "Phase 2", "Create events and registration forms.") },
-      { path: "/admin/finance", element: soon("Finance", "Phase 4", "Move prizes and reimbursements through steps.") },
-      { path: "/admin/icpc", element: soon("ICPC admin", "Phase 5", "Seasons, teams, issues and the worksheet.") },
-      { path: "/admin/audit", element: soon("Audit log", "Phase 7", "Every admin change, with before/after.") },
+      { path: "/admin/events", element: soon("Event highlights", "coming soon", "Add write-ups, results and photo albums for events.") },
+      { path: "/admin/finance", element: soon("Finance", "coming soon", "Move prizes and reimbursements through steps.") },
+      { path: "/admin/icpc", element: soon("ICPC admin", "coming soon", "Seasons, teams, issues and the worksheet.") },
+      { path: "/admin/audit", element: soon("Audit log", "coming soon", "Every admin change, with before/after.") },
     ],
   },
 ], { basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });

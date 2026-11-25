@@ -1,6 +1,7 @@
 # ANCC Website
 
-Website for the **Algorithm and Coding Club (ANCC), IIT Delhi**: events, ECA/CAIC records, prizes and reimbursements, and the ICPC team pipeline.
+Website for the **Algorithm and Coding Club (ANCC), IIT Delhi**: event highlights, prizes and reimbursements, the ICPC team pipeline, the club and alumni.
+Event registration and ECA/CAIC records are handled elsewhere and aren't part of this site.
 
 - `backend/`: PHP 8.2+ JSON API (no framework, no runtime dependencies) on MySQL 8
 - `frontend/`: React + TypeScript + Vite + Tailwind + TanStack Query
@@ -12,17 +13,20 @@ milliseconds there, while a Python app could only run as a CGI script (about 0.7
 
 ## Status
 
-| Phase | What | State |
-|---|---|---|
-| 0 | Setup: repo, Makefile, CI, layouts | ✅ done |
-| 1 | Auth (dev login + IITD OAuth), profile + onboarding, dashboard shell, admin users & roles | ✅ done |
-| — | Hosting on ancc.iitd.ac.in (preview at `/new/`) | ✅ ready |
-| 2 | Events: CRUD, form builder, registration | next |
-| 3 | ECA records, CAIC scores | |
-| 4 | Prizes & reimbursements | |
-| 5 | ICPC | |
-| 6 | Results, Drive photos, About page | |
-| 7 | Notifications, audit log UI | |
+| What | State |
+|---|---|
+| Setup: repo, Makefile, CI, layouts | ✅ done |
+| Auth (dev login + IITD OAuth), profile + onboarding, dashboard shell, admin users & roles | ✅ done |
+| Hosting at https://ancc.iitd.ac.in/new/ | ✅ live |
+| IITD login (OAuth) | requested |
+| Event highlights (write-ups, results, Drive photos) | |
+| Prizes & reimbursements | |
+| ICPC | |
+| About page + Jump Trading sponsor | |
+| Alumni outreach | |
+| Notifications, audit log page, polish | |
+
+The roadmap and progress live in GitHub issue [#15](https://github.com/Proelectro/ancc-dynamic-website/issues/15).
 
 ## Run it locally
 
