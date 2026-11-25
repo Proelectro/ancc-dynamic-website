@@ -1,8 +1,10 @@
 import { ArrowRight, CalendarDays, Gift, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { AnccMark } from "@/components/brand/AnccMark";
 import { buttonStyles, Card } from "@/components/ui";
 import { useMe } from "@/hooks/queries";
+import { cn } from "@/lib/utils";
 
 const PILLARS = [
   {
@@ -26,13 +28,14 @@ export function HomePage() {
   const { data: me } = useMe();
   return (
     <div>
-      <section className="border-b border-border">
+      <section className="bg-brand-slate text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
-          <p className="font-mono text-sm text-accent">$ ./ancc --iit-delhi</p>
-          <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
+          <AnccMark className="h-10 w-auto sm:h-14" />
+          <p className="mt-8 font-mono text-sm text-brand">$ ./ancc --iit-delhi</p>
+          <h1 className="mt-3 max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">
             Algorithm and Coding Club
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-muted">
+          <p className="mt-4 max-w-xl text-lg text-white/75">
             Competitive programming, ICPC preparation and contests for every IIT Delhi student.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -45,7 +48,13 @@ export function HomePage() {
                 Log in with IITD <ArrowRight size={16} />
               </Link>
             )}
-            <Link to="/events" className={buttonStyles({ size: "lg", variant: "secondary" })}>
+            <Link
+              to="/events"
+              className={cn(
+                buttonStyles({ size: "lg", variant: "secondary" }),
+                "border-white/25 bg-transparent text-white hover:bg-white/10",
+              )}
+            >
               See events
             </Link>
           </div>
