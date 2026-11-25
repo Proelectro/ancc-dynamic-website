@@ -7,8 +7,10 @@ namespace Ancc;
 use RuntimeException;
 
 /**
- * Applies migrations/NNN_name.sql files in order and records them in `schema_migrations`.
- * Migrations only move forward: to change the schema, add a new file.
+ * Applies migrations/*.sql in file-name order and records them in `schema_migrations`.
+ * Name new files with a timestamp, e.g. 20261126_1430_events_create.sql, so two branches never pick
+ * the same name (001_… is the original core schema). Migrations only move forward: to change the
+ * schema, add a new file; never edit one that has been merged.
  */
 final class Migrator
 {

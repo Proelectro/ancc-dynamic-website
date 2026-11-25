@@ -7,6 +7,8 @@ Event registration and ECA/CAIC records are handled elsewhere and aren't part of
 - `frontend/`: React + TypeScript + Vite + Tailwind + TanStack Query
 - `deploy/iitd/`: one script to publish to `ancc.iitd.ac.in`
 - The full design is in [`docs/plan.md`](docs/plan.md); context for AI-assisted work is in [`CLAUDE.md`](CLAUDE.md).
+- **Working on a feature? Read [`CONTRIBUTING.md`](CONTRIBUTING.md) first.** Each feature lives in its own folder
+  (`frontend/src/features/<name>/`, `backend/src/Features/<Name>/`) and plugs itself in, so parallel work rarely conflicts.
 
 Why PHP: the IITD CSC server is shared Apache hosting with PHP built in. A PHP API answers in a few
 milliseconds there, while a Python app could only run as a CGI script (about 0.7 s per request).
@@ -31,6 +33,7 @@ The roadmap and progress live in GitHub issue [#15](https://github.com/Proelectr
 ## Run it locally
 
 You need **PHP 8.2+** (with `pdo_mysql`, `curl`, `mbstring`), **Composer**, **Node 20+** and **MySQL 8**.
+On Windows (no `make`), follow the step-by-step commands in [`CONTRIBUTING.md`](CONTRIBUTING.md#running-it-on-your-machine).
 
 ```bash
 # Ubuntu / WSL: tools (once)

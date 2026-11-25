@@ -1,17 +1,10 @@
-import {
-  CalendarDays,
-  Gift,
-  LayoutDashboard,
-  ScrollText,
-  Trophy,
-  User as UserIcon,
-  Users,
-} from "lucide-react";
+import { LayoutDashboard, User as UserIcon, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Badge } from "@/components/ui";
+import { adminNav, memberNav, type SideNavItem } from "@/features/registry";
 import { cn } from "@/lib/utils";
 
 function Footer() {
@@ -41,9 +34,7 @@ export function PublicLayout() {
   );
 }
 
-type SideItem = { to: string; label: string; icon: ReactNode; soon?: string; end?: boolean };
-
-function SideNav({ items, title }: { items: SideItem[]; title: string }) {
+function SideNav({ items, title }: { items: SideNavItem[]; title: string }) {
   return (
     <aside className="lg:w-56 lg:shrink-0">
       <p className="mb-2 hidden px-3 text-xs font-semibold uppercase tracking-wider text-muted lg:block">{title}</p>
@@ -64,7 +55,7 @@ function SideNav({ items, title }: { items: SideItem[]; title: string }) {
             <span>{i.label}</span>
             {i.soon && (
               <Badge className="ml-auto hidden lg:inline-flex" tone="neutral">
-                {i.soon}
+                soon
               </Badge>
             )}
           </NavLink>
@@ -74,22 +65,19 @@ function SideNav({ items, title }: { items: SideItem[]; title: string }) {
   );
 }
 
-const DASH_ITEMS: SideItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} />, end: true },
-  { to: "/dashboard/payouts", label: "Prizes & reimb.", icon: <Gift size={16} />, soon: "soon" },
-  { to: "/icpc", label: "ICPC", icon: <Trophy size={16} />, soon: "soon" },
-  { to: "/profile", label: "Profile", icon: <UserIcon size={16} /> },
+// Core menu items; features add theirs in src/features/*/module.tsx. Lower `order` comes first.
+const DASH_ITEMS: SideNavItem[] = [
+  { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} />, order: 0, end: true },
+  ...memberNav,
+  { to: "/profile", label: "Profile", icon: <UserIcon size={16} />, order: 1000 },
 ];
 
-const ADMIN_ITEMS: SideItem[] = [
-  { to: "/admin/users", label: "Users & roles", icon: <Users size={16} /> },
-  { to: "/admin/events", label: "Events", icon: <CalendarDays size={16} />, soon: "soon" },
-  { to: "/admin/finance", label: "Finance", icon: <Gift size={16} />, soon: "soon" },
-  { to: "/admin/icpc", label: "ICPC", icon: <Trophy size={16} />, soon: "soon" },
-  { to: "/admin/audit", label: "Audit log", icon: <ScrollText size={16} />, soon: "soon" },
+const ADMIN_ITEMS: SideNavItem[] = [
+  { to: "/admin/users", label: "Users & roles", icon: <Users size={16} />, order: 0 },
+  ...adminNav,
 ];
 
-function ShellLayout({ items, title }: { items: SideItem[]; title: string }) {
+function ShellLayout({ items, title }: { items: SideNavItem[]; title: string }) {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
