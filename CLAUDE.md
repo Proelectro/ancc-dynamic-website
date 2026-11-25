@@ -129,4 +129,4 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - Keep replies concise; render math in LaTeX if any comes up.
 - The user is on Windows and setting up an **Ubuntu dual boot** (WSL failed with `E_UNEXPECTED`/`REGDB_E_CLASSNOTREG`).
   So deploys run on the server over SSH (Windows OpenSSH is enough), not from the laptop.
-- Prefer showing something running (screenshots, tests) over long plans. Ask before big direction changes.
+- Ask before big direction changes. **Don't run tests, replica checks or screenshots after every change; only when the user asks** (said 25 Nov).
