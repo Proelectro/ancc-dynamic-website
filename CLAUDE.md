@@ -78,11 +78,13 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 - **Live since 24 Nov 2026:** `https://ancc.iitd.ac.in/new/` (open, no password; see above).
   Deployed from `/var/www/ancc/https/app/src-me1230384`. To update: push to `main`, wait for CI, then `deploy/iitd/deploy.sh update` there.
 - If the earlier Python version was ever deployed there, `deploy.sh reset-db` clears the old tables (preview data only).
-- **IITD OAuth** (documented at https://oauth2.iitd.ac.in/client_config.php): contact **Mr. Gopal Krishan** (OAuth administrator)
-  with Client Name, Server URI (`https://ancc.iitd.ac.in`) and Redirect URI (`https://ancc.iitd.ac.in/new/api/v1/auth/callback`);
+- **IITD OAuth** (documented at https://oauth2.iitd.ac.in/client_config.php): email **webgroup@cc.iitd.ac.in** (Mr. Gopal Krishan /
+  Dr. Manish Agarwal) with Client Name, Server URI (`https://ancc.iitd.ac.in`) and Redirect URI (`https://ancc.iitd.ac.in/new/api/v1/auth/callback`);
   he returns `client_id` + `client_secret`. Flow: `authorize.php` → callback `?code` → `token.php` (POST client_id,
   client_secret, grant_type, code) → `resource.php` (POST access_token) → `user_id` (= kerberos), `mail`, `name`,
   `uniqueiitdid`, `category`, `department`. `IitdOAuth.php` follows this; `redirect_uri` is not sent unless configured.
+  **Open question:** one docs page says `oauth2.iitd.ac.in`, another `oauth.iitd.ac.in`; the code defaults to `oauth2`. Asked in the
+  request email; if it's `oauth`, set the three `IITD_OAUTH_*_URL` values in the server's config.php (no code change).
 - Going public later: in config.php set `ENV=production`, `AUTH_MODE=iitd`, `IITD_OAUTH_CLIENT_ID/SECRET`, deploy, then run
   `bin/create-superadmin.php`. The redirect URI must be re-registered when the app moves from `/new/` to the root.
 - Shared hosting has **no background jobs**: do "scheduled" work lazily on request, via admin buttons, or with cron if CSC allows it.
