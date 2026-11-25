@@ -1,6 +1,0 @@
-
-# Preview mode: only people with the preview password can open the app.
-AuthType Basic
-AuthName "ANCC preview"
-AuthUserFile @APP_DIR@/.htpasswd
-Require valid-user

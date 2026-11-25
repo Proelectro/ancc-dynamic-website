@@ -6,18 +6,16 @@
 # On the server it notices /var/www/ancc and works locally, without SSH.
 #
 #   deploy/iitd/deploy.sh check      # test PHP, .htaccess and folder permissions on the server
-#   deploy/iitd/deploy.sh setup      # first time only: create the server config + preview password
+#   deploy/iitd/deploy.sh setup      # first time only: create the server config
 #   deploy/iitd/deploy.sh            # build and upload the app (same as "deploy")
 #   deploy/iitd/deploy.sh update     # on the server: git pull the deploy branch, then deploy
-#   deploy/iitd/deploy.sh password   # change the preview password
-#   deploy/iitd/deploy.sh preview off|on  # remove / add the preview password, then deploy
 #   deploy/iitd/deploy.sh logs       # show the last lines of Apache's error log
 #   deploy/iitd/deploy.sh reset-db   # drop ALL tables and recreate them (asks first)
 #
 # Layout on the server (see deploy/iitd/README.md):
 #   https://ancc.iitd.ac.in/new/        -> /var/www/ancc/https/html/new/  (React build, .htaccess, api.php)
 #   https://ancc.iitd.ac.in/new/api/... -> html/new/api.php -> app code in /var/www/ancc/https/app/
-#   /var/www/ancc/https/app/            -> backend code, config.php, .htpasswd (not reachable from the web)
+#   /var/www/ancc/https/app/            -> backend code, config.php (not reachable from the web)
 set -euo pipefail
 set -f # no filename globbing; keeps options like "--noproxy *" intact
 
@@ -29,7 +27,6 @@ fi
 URL="${ANCC_URL:-https://ancc.iitd.ac.in}"        # public URL of the site
 SUBDIR="${ANCC_SUBDIR:-new}"                      # app lives at $URL/$SUBDIR/
 REMOTE_PHP="${ANCC_REMOTE_PHP:-php}"              # PHP command-line binary on the server
-PREVIEW="${ANCC_PREVIEW:-auto}"                   # 1 = password-protect the app, 0 = open; auto = on if a preview password exists
 SITE=/var/www/ancc/https
 APP="$SITE/app"
 BASE="/$SUBDIR"
@@ -134,7 +131,7 @@ if ($password === null) {
 }
 $socket = '/var/run/mysqld/mysqld.sock';
 $config = [
-    'ENV' => 'staging',          // preview: dev login on, whole app behind the preview password
+    'ENV' => 'staging',          // dev login on until IITD OAuth is approved
     'AUTH_MODE' => 'dev',
     'DB_SOCKET' => file_exists($socket) ? $socket : '',
     'DB_HOST' => '127.0.0.1',
@@ -169,22 +166,19 @@ id -Gn | tr ' ' '\n' | grep -qx ancc && echo "group:   in group ancc" || echo "g
 REMOTE
   remote_script "$SITE" <<<"SITE=\$1$HTML_CHECK" || die "Fix the web root's permissions first (see above)."
 
-  say "Testing PHP under Apache, .htaccess rewrites and password protection"
+  say "Testing PHP under Apache and .htaccess rewrites"
   local tmp; tmp="$(mktemp -d)"
-  mkdir -p "$tmp/check/locked"
+  mkdir -p "$tmp/check"
   cat >"$tmp/check/index.php" <<'PHP'
 <?php
 header('Content-Type: text/plain');
 echo 'ancc-check-ok ', PHP_VERSION, ' pdo_mysql=', extension_loaded('pdo_mysql') ? 'yes' : 'no', ' uri=', $_SERVER['REQUEST_URI'];
 PHP
   printf 'RewriteEngine On\nRewriteCond %%{REQUEST_FILENAME} !-f\nRewriteRule ^ index.php [L]\n' >"$tmp/check/.htaccess"
-  printf 'AuthType Basic\nAuthName "check"\nAuthUserFile %s/ancc-check/locked/.htpasswd\nRequire valid-user\n' "$SITE/html" >"$tmp/check/locked/.htaccess"
-  printf 'nobody:$apr1$x$invalid\n' >"$tmp/check/locked/.htpasswd"
   push "$tmp/check/" "$(at "$SITE/html/ancc-check/")"
   remote "chgrp -R ancc $SITE/html/ancc-check 2>/dev/null; chmod -R g+rX $SITE/html/ancc-check"
-  local out locked
+  local out
   out="$(fetch "$URL/ancc-check/some/deep/path" || true)"
-  locked="$(http_code "$URL/ancc-check/locked/")"
   remote "rm -rf $SITE/html/ancc-check"
   rm -rf "$tmp"
   local ok=1
@@ -195,30 +189,11 @@ PHP
     warn "Expected 'ancc-check-ok ...' from $URL/ancc-check/some/deep/path but got:"
     printf '%s\n' "$out" | head -20 >&2
   fi
-  if [ "$locked" = "401" ]; then
-    say "Password protection (.htaccess Basic Auth) works"
-  else
-    ok=0
-    warn "Expected HTTP 401 from a password-protected folder but got $locked"
-  fi
   [ "$ok" = 1 ] || die "Something is blocked. See: deploy/iitd/deploy.sh logs"
   say "All good. Next: deploy/iitd/deploy.sh setup"
 }
 
 # ---------------------------------------------------------------------------------------------
-set_password() {
-  need openssl "Install it with: sudo apt install openssl"
-  local user pw pw2 hash
-  read -r -p "Preview username (e.g. ancc): " user
-  [[ "$user" =~ ^[A-Za-z0-9._-]+$ ]] || die "Use letters, digits, . _ - only"
-  read -r -s -p "Preview password: " pw; echo
-  read -r -s -p "Repeat password: " pw2; echo
-  [ -n "$pw" ] && [ "$pw" = "$pw2" ] || die "Passwords are empty or don't match"
-  hash="$(printf '%s' "$pw" | openssl passwd -apr1 -stdin)"
-  printf '%s:%s\n' "$user" "$hash" | remote_stdin "umask 027 && cat > $APP/.htpasswd && chgrp ancc $APP/.htpasswd 2>/dev/null; true"
-  say "Preview password saved. Share it only with club editors."
-}
-
 cmd_setup() {
   connect
   say "Creating folders and the server config ($APP/config.php)"
@@ -242,14 +217,6 @@ chgrp ancc "$APP/config.php" 2>/dev/null || true
 chmod 640 "$APP/config.php"
 echo "   created $APP/config.php (mode 640, group ancc)"
 REMOTE
-  if [ "$PREVIEW" != "0" ]; then
-    if remote "test -f $APP/.htpasswd"; then
-      say "Preview password already set (change it with: deploy/iitd/deploy.sh password)"
-    else
-      say "Choose the preview username/password editors will use to open $URL$BASE/"
-      set_password
-    fi
-  fi
   say "Setup done. Now run: deploy/iitd/deploy.sh"
 }
 
@@ -280,27 +247,12 @@ build() {
   say "Packing the backend"
   rsync -a "$ROOT/backend/src" "$ROOT/backend/migrations" "$ROOT/backend/bin" "$BUILD/backend/"
   sed -e "s|@APP_DIR@|$APP|g" "$KIT/api.php.in" >"$BUILD/html/api.php"
-
-  local auth=""
-  if [ "$PREVIEW" = "1" ]; then
-    auth="$(sed -e "s|@APP_DIR@|$APP|" "$KIT/auth-block.in")"
-  fi
-  AUTH="$auth" BASE="$BASE" awk '
-    { gsub(/@BASE@/, ENVIRON["BASE"]) }
-    /^@AUTH@$/ { print ENVIRON["AUTH"]; next }
-    { print }
-  ' "$KIT/htaccess-app.in" >"$BUILD/html/.htaccess"
+  sed -e "s|@BASE@|$BASE|g" "$KIT/htaccess-app.in" >"$BUILD/html/.htaccess"
 }
 
 cmd_deploy() {
   connect
   remote "test -f $APP/config.php" || die "Run 'deploy/iitd/deploy.sh setup' first."
-  if [ "$PREVIEW" = "auto" ]; then
-    if remote "test -f $APP/.htpasswd"; then PREVIEW=1; else PREVIEW=0; fi
-  fi
-  if [ "$PREVIEW" = "1" ]; then
-    remote "test -f $APP/.htpasswd" || die "No preview password yet. Run: deploy/iitd/deploy.sh password"
-  fi
   build
 
   say "Uploading (only changed files are sent)"
@@ -319,6 +271,8 @@ for dir in "$APP/backend" "$SITE/html$BASE"; do
 done
 # Leftovers from the first (Python/CGI) version, if they were ever deployed.
 rm -rf "$APP/vendor" 2>/dev/null || true
+# The old preview password file (that feature was removed).
+if [ -O "$APP/.htpasswd" ]; then rm -f "$APP/.htpasswd"; fi
 for f in "$SITE/cgi-bin/api.cgi" "$SITE/cgi-bin/.htaccess"; do
   if [ -O "$f" ]; then rm -f "$f"; fi
 done
@@ -332,8 +286,7 @@ REMOTE
 
   local code; code="$(http_code "$URL$BASE/")"
   case "$code" in
-    401) say "Deployed. $URL$BASE/ is up and asks for the preview password (HTTP 401, as expected)." ;;
-    200) say "Deployed. $URL$BASE/ is up (HTTP 200, no preview password)."
+    200) say "Deployed. $URL$BASE/ is up (HTTP 200)."
       if remote "grep -q \"'AUTH_MODE' => 'dev'\" $APP/config.php"; then
         warn "Dev login is on: anyone who can open $URL$BASE/ can log in as any user, including admins. Test data only."
       fi ;;
@@ -349,22 +302,6 @@ cmd_update() {
   git -C "$ROOT" pull --ff-only --quiet || die "git pull failed (see above)."
   say "Now at: $(git -C "$ROOT" log -1 --format='%s (%cr)')"
   exec "$0" deploy  # run the freshly pulled version of this script
-}
-
-cmd_preview() {
-  case "${1:-}" in
-    off)
-      connect
-      remote "rm -f $APP/.htpasswd"
-      say "Preview password removed."
-      PREVIEW=0; cmd_deploy ;;
-    on)
-      connect
-      say "Choose the preview username/password editors will use to open $URL$BASE/"
-      set_password
-      PREVIEW=1; cmd_deploy ;;
-    *) die "Use: deploy/iitd/deploy.sh preview off   (or: preview on)" ;;
-  esac
 }
 
 cmd_reset_db() {
@@ -387,10 +324,8 @@ case "${1:-deploy}" in
   setup) cmd_setup ;;
   deploy) cmd_deploy ;;
   update) cmd_update ;;
-  password) connect && set_password ;;
-  preview) cmd_preview "${2:-}" ;;
   logs) cmd_logs "${2:-40}" ;;
   reset-db) cmd_reset_db ;;
-  -h | --help | help) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
-  *) die "Unknown command '$1'. Try: check, setup, deploy, update, password, preview, logs, reset-db" ;;
+  -h | --help | help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) die "Unknown command '$1'. Try: check, setup, deploy, update, logs, reset-db" ;;
 esac

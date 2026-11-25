@@ -83,7 +83,7 @@ backend/
 
 ## Deploying to ancc.iitd.ac.in
 
-The app runs on the IITD CSC server as a password-protected preview at **https://ancc.iitd.ac.in/new/**.
+The app runs on the IITD CSC server at **https://ancc.iitd.ac.in/new/** (IITD network only; dev login on until IITD OAuth).
 CI builds every push to `main` into the `deploy` branch; the server pulls that branch. On the server, from
 its clone (`/var/www/ancc/https/app/src-<kerberos>`):
 

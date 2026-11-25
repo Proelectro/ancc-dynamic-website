@@ -7,13 +7,12 @@ The CSC server is shared Apache hosting with PHP and MySQL 8, with no sudo. The 
 | `https://ancc.iitd.ac.in/` | `/var/www/ancc/https/html/` | The old static site (untouched) |
 | `https://ancc.iitd.ac.in/new/` | `/var/www/ancc/https/html/new/` | The React app (built files + `.htaccess`) |
 | `https://ancc.iitd.ac.in/new/api/...` | `html/new/api.php` | Tiny entry file that loads the PHP app |
-| *(not on the web)* | `/var/www/ancc/https/app/` | Backend code, `config.php` (DB password), preview password |
+| *(not on the web)* | `/var/www/ancc/https/app/` | Backend code, `config.php` (DB password) |
 
 API calls take a few milliseconds, because Apache runs PHP directly.
 
-While IITD login (OAuth) isn't approved yet, dev login is on. `/new/` can sit behind a **preview password**
-(`preview on`) or be open (`preview off`); a normal deploy keeps whichever is set. With it open, anyone who
-can reach `/new/` can use dev login as any user, so keep only test data there until IITD login works.
+While IITD login (OAuth) isn't approved yet, dev login is on: anyone who can reach `/new/` (IITD network
+only) can log in as any user. Keep only test data there until IITD login works.
 
 ## How a change reaches the server
 
@@ -52,19 +51,17 @@ in `app/.git-credentials-<you>`, readable only by you, so later updates don't as
 **3. Check, set up, deploy:**
 
 ```bash
-deploy/iitd/deploy.sh check    # tests PHP, .htaccess rewrites, password protection, folder permissions
-deploy/iitd/deploy.sh setup    # creates the server config and asks you for a preview password
+deploy/iitd/deploy.sh check    # tests PHP, .htaccess rewrites and folder permissions
+deploy/iitd/deploy.sh setup    # creates the server config
 deploy/iitd/deploy.sh          # installs the app and sets up the database
 ```
 
 - **`setup`** writes `/var/www/ancc/https/app/config.php`. It reads the MySQL credentials from CSC's
-  `/var/www/ancc/README` and generates a random JWT secret. The password never goes into git. It also asks
-  for a **preview username and password**; share these with editors only.
+  `/var/www/ancc/README` and generates a random JWT secret. The password never goes into git.
 - **`deploy`** copies the backend to `app/backend/` and the built frontend to `html/new/`, fixes group
   permissions, applies new database migrations, and runs a health check.
 
-Then open **https://ancc.iitd.ac.in/new/**, enter the preview username/password, and log in with the
-dev login buttons.
+Then open **https://ancc.iitd.ac.in/new/** and log in with the dev login buttons.
 
 ## Updating the site
 
@@ -81,9 +78,6 @@ Other commands (run from the clone):
 
 | Command | What it does |
 |---|---|
-| `deploy/iitd/deploy.sh password` | Change the preview password |
-| `deploy/iitd/deploy.sh preview off` | Remove the preview password and redeploy (`/new/` opens for anyone on the IITD network) |
-| `deploy/iitd/deploy.sh preview on` | Add a preview password back and redeploy |
 | `deploy/iitd/deploy.sh logs` | Show the end of Apache's error log (start here when something breaks) |
 | `deploy/iitd/deploy.sh check` | Re-test the server setup |
 | `deploy/iitd/deploy.sh reset-db` | Delete all tables and recreate them (asks you to type RESET) |
@@ -118,7 +112,7 @@ repo root on `main`: `deploy/iitd/deploy.sh check`, `setup`, and `deploy/iitd/de
 | `git clone`/`update` asks for a password again or says `Authentication failed` | The token expired or lacks *Contents: Read-only*. Make a new one; delete `app/.git-credentials-<you>` and run `update` again |
 | `update` says it isn't on the deploy branch | That clone is of `main`. Clone again with `--branch deploy` (step 2) |
 | `check` gets HTTP 000 from the site | The server can't reach itself directly. Retry with `ANCC_CURL_OPTS="--proxy http://henna.iitd.ac.in:3128" deploy/iitd/deploy.sh check` |
-| `check` says rewrites or password protection don't work | Run `deploy/iitd/deploy.sh logs`. "not allowed here" means CSC's Apache config doesn't allow that `.htaccess` directive. Ask CSC to allow `AllowOverride FileInfo AuthConfig` for our site |
+| `check` says rewrites don't work | Run `deploy/iitd/deploy.sh logs`. "not allowed here" means CSC's Apache config doesn't allow that `.htaccess` directive. Ask CSC to allow `AllowOverride FileInfo AuthConfig` for our site |
 | API calls return 500 | `deploy/iitd/deploy.sh logs` shows the PHP error (lines start with `ANCC API error`) |
 | "Server misconfigured" | `config.php` is missing or invalid. Run `setup`, or check the error log |
 | `rsync: Permission denied` on some file | Another editor's file without group write. They should run `deploy/iitd/deploy.sh` once (it fixes permissions on their own files) |
@@ -129,7 +123,7 @@ When CSC approves IITD OAuth:
 
 1. Edit `/var/www/ancc/https/app/config.php` on the server: set `'ENV' => 'production'`, `'AUTH_MODE' => 'iitd'`
    and add the three `IITD_OAUTH_*` values (the comment at the top of the file lists them).
-2. Deploy without the preview password: `ANCC_PREVIEW=0 deploy/iitd/deploy.sh` (from the server clone).
+2. Deploy: `deploy/iitd/deploy.sh update` (from the server clone). Dev login is now off.
 3. Make the first admin: `ssh ancc`, then
    `cd /var/www/ancc/https/app/backend && ANCC_CONFIG=../config.php php bin/create-superadmin.php <kerberos-id>`.
 4. When all phases are built, the app can move from `/new/` to the domain root (`ANCC_SUBDIR` and
@@ -142,6 +136,5 @@ When CSC approves IITD OAuth:
 | `ANCC_HOST` | `local` on the server, else `ancc` | SSH host (alias from `~/.ssh/config`), or `local` |
 | `ANCC_URL` | `https://ancc.iitd.ac.in` | Public URL |
 | `ANCC_SUBDIR` | `new` | App path under the URL |
-| `ANCC_PREVIEW` | `auto` | `1` = password-protect the app, `0` = open, `auto` = protect if a preview password exists |
 | `ANCC_REMOTE_PHP` | `php` | PHP command on the server |
 | `ANCC_CURL_OPTS` | *(empty)* | Extra curl options for the checks (used for testing) |
