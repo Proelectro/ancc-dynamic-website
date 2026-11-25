@@ -52,7 +52,11 @@ export function AdminUsersPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Select aria-label="Filter by hostel" value={hostel} onChange={(e) => update({ hostel: e.target.value, page: "1" })}>
+        <Select
+          aria-label="Filter by hostel"
+          value={hostel}
+          onChange={(e) => update({ hostel: e.target.value, page: "1" })}
+        >
           <option value="">All hostels</option>
           {config?.hostels.map((h) => (
             <option key={h}>{h}</option>

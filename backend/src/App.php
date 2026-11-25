@@ -120,6 +120,34 @@ final class App
         $r->add('GET', '/api/v1/admin/users/{id}', $admin->show(...));
         $r->add('PATCH', '/api/v1/admin/users/{id}', $admin->update(...));
         $r->add('PUT', '/api/v1/admin/users/{id}/roles', $admin->setRoles(...));
+
+        foreach (self::featureModules() as $module) {
+            $module->register($this, $r);
+        }
         return $r;
+    }
+
+    /**
+     * Every src/Features/<Name>/Module.php, in folder-name order. Folders starting with "_" are skipped.
+     * @return list<FeatureModule>
+     */
+    public static function featureModules(): array
+    {
+        $files = glob(__DIR__ . '/Features/*/Module.php') ?: [];
+        sort($files);
+        $modules = [];
+        foreach ($files as $file) {
+            $name = basename(dirname($file));
+            if (str_starts_with($name, '_')) {
+                continue;
+            }
+            $class = "Ancc\\Features\\{$name}\\Module";
+            $module = new $class();
+            if (!$module instanceof FeatureModule) {
+                throw new \LogicException("$class must implement Ancc\\FeatureModule");
+            }
+            $modules[] = $module;
+        }
+        return $modules;
     }
 }

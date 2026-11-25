@@ -29,14 +29,25 @@ backend/   public/index.php (local entry) · src/{App,Config,Db,Migrator,Users,A
            src/Auth (Session: JWT access + rotating refresh cookies, Jwt, IitdOAuth)
            src/Controllers (Auth, User, Dashboard, AdminUser, Health) · src/Http (Request/Response/Router/HttpError)
            src/Support (Kerberos, Roles, Lists=hostels, Validate, Uuid) · migrations/NNN_*.sql · bin/*.php · tests/ (PHPUnit)
+           src/Features/<Name>/Module.php (feature modules, auto-discovered by App::featureModules(); _Template skipped)
 frontend/  src/{api,hooks/queries.ts,components,layouts,pages,lib} · router.tsx (basename from VITE_BASE)
+           src/features/<name>/module.tsx (feature modules: routes, nav, dashboard cards; found by features/registry.ts)
 deploy/iitd/  deploy.sh (check|setup|deploy|update|logs|reset-db) + templates + README.md
 docs/plan.md  full spec · .github/ CI + CODEOWNERS
 ```
 
-Conventions:
-- **Adding an endpoint:** a controller method, one line in `App::routes()`, a PHPUnit test, and the TS type.
-- **Schema change:** add the next `backend/migrations/NNN_name.sql` (forward-only), then `make migrate`.
+Conventions (full contributor guide: `CONTRIBUTING.md`; juniors work on features in parallel, 25 Nov 2026):
+- **Features are plug-in folders** so parallel branches don't conflict: frontend `src/features/<name>/module.tsx`
+  (`defineFeature({ publicRoutes, memberRoutes, adminRoutes, topNav, memberNav, adminNav, dashboardCards })`), plus the
+  feature's own pages/components/api.ts/hooks.ts/types.ts; backend `src/Features/<Name>/Module.php` implementing
+  `Ancc\FeatureModule::register(App, Router)`, plus Controller/queries/seed.php; tests in `backend/tests/Features/`.
+  Never add feature routes/nav to `router.tsx`, `Layouts.tsx`, `Navbar.tsx`, `App.php` or the dashboard endpoint.
+  Folders: events (#4), resources (#17), about (#7), icpc (#6), payouts (#5), alumni (#8), audit (#9); general UI is #18.
+- **Adding a core endpoint** (rare): a controller method, one line in `App::routes()`, a PHPUnit test, and the TS type.
+- **Schema change:** add `backend/migrations/YYYYMMDD_HHMM_<feature>_<what>.sql` (timestamp, not a number; forward-only;
+  table names prefixed with the feature), then `make migrate`. `001_…` is the original core schema.
+- Frontend formatting: Prettier (`.prettierrc.json`, width 120, double quotes); CI runs `npm run format:check`.
+  `.gitattributes` forces LF; `.editorconfig` for everything else. PR template in `.github/`.
 - DB times are **UTC** (`DATETIME(6)`; the session sets `time_zone = '+00:00'`); JSON shows ISO 8601. IDs are UUID v4 `CHAR(36)`.
 - **Identifier is `kerberos_id`** (for example `cs1230007`); the user dropped entry numbers. Department and year are derived in `Support/Kerberos.php`.
 - Roles: `member` (implicit), `coordinator`, `icpc_admin`, `finance`, `super_admin` (passes every check). There is no coach role.
@@ -97,11 +108,15 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 
 ## Git workflow (current)
 
-- Repo: **github.com/Proelectro/ancc-dynamic-website**, **public since 25 Nov 2026** (history scanned: no secrets). For now
-  **push directly to `main`**. Ruleset **`protect-main`** (active, default branch): restrict deletions + block force pushes only.
+- Repo: **github.com/Proelectro/ancc-dynamic-website**, **public since 25 Nov 2026** (history scanned: no secrets).
   Being public, the server clone no longer strictly needs a token to pull.
-- Later: a ruleset requiring a PR plus Code Owner review. Caveat: Claude's GitHub identity is **Proelectro**, the only code
-  owner, and nobody can approve their own PR. So add a second code owner, or give proelectro "pull requests only" bypass.
+- **Pull requests only (since 25 Nov 2026).** Never push to `main`. For each change: create a branch (`feat/...`, `fix/...`,
+  `docs/...`), commit, push the branch, open a PR with `gh pr create` describing what changed and why, and tell the user the
+  PR link. **The user reviews and merges; don't merge PRs yourself unless the user asks.** CI (`backend`, `frontend`) runs
+  on every PR; the `deploy` branch is only rebuilt after a merge to `main`.
+- Ruleset **`protect-main`** (default branch): require a pull request (0 approvals, because Claude's GitHub identity is
+  Proelectro, the only code owner, and nobody can approve their own PR), require the `backend` and `frontend` checks,
+  restrict deletions, block force pushes. Code Owner review can be turned on once there's a second code owner.
 - Commit messages end with the attribution lines the session provides (Co-Authored-By / Claude-Session).
 - Never commit `backend/config.php`, the server's config, or anything from `/var/www/ancc/README`.
 
@@ -125,7 +140,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   No DOB is collected, so the eligibility check uses the studies start year and shows "needs check" otherwise. There's an issues
   loop ("email not found", etc.) and a registration worksheet with copy buttons for the ICPC admin. No coach role.
 - **Event photos:** from the ANCC Google Drive folder link (synced via the Drive API), not uploaded to the server.
-- **Merging:** only proelectro may merge to `main` (CODEOWNERS `* @proelectro`) once PR rules are on.
+- **Merging:** only proelectro merges to `main`, through pull requests (CODEOWNERS `* @proelectro`).
 
 ## Status and next steps
 

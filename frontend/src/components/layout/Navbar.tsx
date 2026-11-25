@@ -5,15 +5,13 @@ import { toast } from "sonner";
 
 import { AnccMark } from "@/components/brand/AnccMark";
 import { buttonStyles } from "@/components/ui";
+import { topNav } from "@/features/registry";
 import { useLogout, useMe } from "@/hooks/queries";
 import { isAdmin } from "@/lib/roles";
 import { cn, initials } from "@/lib/utils";
 
-const NAV = [
-  { to: "/events", label: "Events" },
-  { to: "/icpc", label: "ICPC" },
-  { to: "/about", label: "About" },
-];
+// Top links come from src/features/*/module.tsx (topNav).
+const NAV = topNav;
 
 export function Logo() {
   return (

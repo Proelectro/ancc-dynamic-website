@@ -26,3 +26,15 @@ foreach ($sample as [$kid, $name, $hostel, $roles, $phone]) {
     $users->addRoles($u['id'], $roles);
 }
 echo 'Seeded ', count($sample), " users.\n";
+
+// Each feature's sample data: src/Features/*/seed.php (folders starting with "_" are skipped).
+$db = Ancc\Db::connect(ancc_config());
+$seeds = glob(dirname(__DIR__) . '/src/Features/*/seed.php') ?: [];
+sort($seeds);
+foreach ($seeds as $seed) {
+    if (str_starts_with(basename(dirname($seed)), '_')) {
+        continue;
+    }
+    require $seed;
+    echo 'Seeded ', basename(dirname($seed)), ".\n";
+}

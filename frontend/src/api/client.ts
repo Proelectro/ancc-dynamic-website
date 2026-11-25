@@ -37,9 +37,7 @@ export function errorMessage(err: unknown, fallback = "Something went wrong"): s
     const detail = (err.response?.data as { detail?: unknown } | undefined)?.detail;
     if (typeof detail === "string") return detail;
     if (Array.isArray(detail) && detail.length) {
-      return detail
-        .map((d: { msg?: string }) => (d.msg ?? "").replace(/^Value error, /, ""))
-        .join(" · ");
+      return detail.map((d: { msg?: string }) => (d.msg ?? "").replace(/^Value error, /, "")).join(" · ");
     }
   }
   return fallback;

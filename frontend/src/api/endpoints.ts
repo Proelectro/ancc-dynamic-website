@@ -18,11 +18,12 @@ export type UserFilters = { q?: string; hostel?: string; role?: string; page?: n
 export const adminApi = {
   users: (f: UserFilters) =>
     api
-      .get<UserList>("/admin/users", { params: { ...f, q: f.q || undefined, hostel: f.hostel || undefined, role: f.role || undefined } })
+      .get<UserList>("/admin/users", {
+        params: { ...f, q: f.q || undefined, hostel: f.hostel || undefined, role: f.role || undefined },
+      })
       .then((r) => r.data),
   user: (id: string) => api.get<User>(`/admin/users/${id}`).then((r) => r.data),
-  setRoles: (id: string, roles: string[]) =>
-    api.put<User>(`/admin/users/${id}/roles`, { roles }).then((r) => r.data),
+  setRoles: (id: string, roles: string[]) => api.put<User>(`/admin/users/${id}/roles`, { roles }).then((r) => r.data),
   update: (id: string, body: { is_active?: boolean; bank_details_on_file?: boolean }) =>
     api.patch<User>(`/admin/users/${id}`, body).then((r) => r.data),
 };
