@@ -17,6 +17,9 @@ ICPC team), and admin tooling. Maintainer: **Proelectro** (GitHub), an IITD stud
   the table at the top of that file maps the planned Python pieces to PHP ones.
 - **Frontend:** React 19 + TypeScript + Vite 6 + Tailwind v4 + TanStack Query + React Hook Form/Zod + sonner + lucide.
   API types are hand-written in `frontend/src/api/types.ts` (keep them in sync with `Users::out()` and the controllers).
+- **Brand (25 Nov):** ANCC palette from the logo: slate `#373D4B`, orange `#DF6C36` (`--brand`), white; deeper orange `#C2541F`
+  (`--accent`) for text/buttons on light backgrounds (AA contrast). Tokens in `frontend/src/index.css`; logo as SVG in
+  `components/brand/AnccMark.tsx`; original files in `frontend/public/brand/`.
 - **No Docker.** Local dev uses PHP's built-in server plus Vite (`make dev`).
 
 ## Layout
