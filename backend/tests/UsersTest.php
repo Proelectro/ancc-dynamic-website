@@ -24,7 +24,8 @@ final class UsersTest extends ApiTestCase
 
         $d = $this->client->request('GET', '/api/v1/dashboard')->data();
         $this->assertSame([], $d['profile_missing']);
-        $this->assertSame(['available' => false, 'phase' => 'Phase 3'], $d['eca']);
+        $this->assertSame(['available' => false, 'phase' => 'Soon'], $d['payouts']);
+        $this->assertArrayNotHasKey('eca', $d);
     }
 
     public function testProfileValidationAndReadOnlyFields(): void

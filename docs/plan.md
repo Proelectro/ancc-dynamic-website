@@ -24,6 +24,13 @@ Backend: PHP 8.4 (originally planned as FastAPI) · Frontend: React · Database:
 > Section 2 (tech stack) and section 3.3 (backend file structure) below describe the original Python
 > design; the current layout is in the repository README.
 
+> **Scope update (24–25 Nov 2026):** event **registration** (and its form builder) and **ECA/CAIC** records are handled
+> elsewhere, so this site doesn't build them. Sections 1.3 (registration parts), 1.4 (ECA/CAIC), 1.7 (form builder,
+> registration settings, ECA/CAIC settings) and the related models, endpoints and pages below are kept only as history.
+> What remains: an **event highlights** page (write-up, results, Drive photos, link to external registration), prizes and
+> reimbursements (prizes added by finance), ICPC, About + sponsor, and a new **alumni outreach** page. The current
+> roadmap is GitHub issue #15.
+
 ---
 
 ## 0. Overview

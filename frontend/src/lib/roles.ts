@@ -10,7 +10,7 @@ export const ROLE_LABELS: Record<Role, string> = {
 };
 
 export const ROLE_HELP: Record<(typeof GRANTABLE_ROLES)[number], string> = {
-  coordinator: "Events, forms, results, ECA records and CAIC scores",
+  coordinator: "Event highlights, results and photos",
   icpc_admin: "ICPC seasons, teams and registration on icpc.global",
   finance: "Prize and reimbursement status",
   super_admin: "Everything, plus roles, About page and audit log",

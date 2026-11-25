@@ -109,7 +109,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   reimbursements** (prizes now added by finance, not from our event results), ICPC, About, and a new **alumni outreach** page.
   The ECA/CAIC bullets below are kept only as history.
 
-- **Dashboard order:** Profile on top, then ECA, CAIC, Prizes & reimbursements, ICPC, My events.
+- **Dashboard order:** Profile on top, then Prizes & reimbursements, ICPC (ECA, CAIC and My events removed 25 Nov).
 - **ECA** = a list of achievements (bullet records like "Secured 1st in Code Decode"), **no numbers**.
 - **CAIC** = numeric score toward the CAIC Trophy (inter-hostel, year-long). One entry per student per event, with a hostel snapshot.
   The points table is per event (values come from the CAIC team). Fix mistakes by revoking with a reason, never by deleting.

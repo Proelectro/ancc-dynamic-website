@@ -2,7 +2,6 @@ import {
   CalendarDays,
   Gift,
   LayoutDashboard,
-  ListChecks,
   ScrollText,
   Trophy,
   User as UserIcon,
@@ -77,19 +76,17 @@ function SideNav({ items, title }: { items: SideItem[]; title: string }) {
 
 const DASH_ITEMS: SideItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} />, end: true },
-  { to: "/dashboard/eca-caic", label: "ECA & CAIC", icon: <ListChecks size={16} />, soon: "P3" },
-  { to: "/dashboard/events", label: "My events", icon: <CalendarDays size={16} />, soon: "P2" },
-  { to: "/dashboard/payouts", label: "Prizes & reimb.", icon: <Gift size={16} />, soon: "P4" },
-  { to: "/icpc", label: "ICPC", icon: <Trophy size={16} />, soon: "P5" },
+  { to: "/dashboard/payouts", label: "Prizes & reimb.", icon: <Gift size={16} />, soon: "soon" },
+  { to: "/icpc", label: "ICPC", icon: <Trophy size={16} />, soon: "soon" },
   { to: "/profile", label: "Profile", icon: <UserIcon size={16} /> },
 ];
 
 const ADMIN_ITEMS: SideItem[] = [
   { to: "/admin/users", label: "Users & roles", icon: <Users size={16} /> },
-  { to: "/admin/events", label: "Events", icon: <CalendarDays size={16} />, soon: "P2" },
-  { to: "/admin/finance", label: "Finance", icon: <Gift size={16} />, soon: "P4" },
-  { to: "/admin/icpc", label: "ICPC", icon: <Trophy size={16} />, soon: "P5" },
-  { to: "/admin/audit", label: "Audit log", icon: <ScrollText size={16} />, soon: "P7" },
+  { to: "/admin/events", label: "Events", icon: <CalendarDays size={16} />, soon: "soon" },
+  { to: "/admin/finance", label: "Finance", icon: <Gift size={16} />, soon: "soon" },
+  { to: "/admin/icpc", label: "ICPC", icon: <Trophy size={16} />, soon: "soon" },
+  { to: "/admin/audit", label: "Audit log", icon: <ScrollText size={16} />, soon: "soon" },
 ];
 
 function ShellLayout({ items, title }: { items: SideItem[]; title: string }) {
