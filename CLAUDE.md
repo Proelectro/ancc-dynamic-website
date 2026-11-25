@@ -97,11 +97,15 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 
 ## Git workflow (current)
 
-- Repo: **github.com/Proelectro/ancc-dynamic-website**, **public since 25 Nov 2026** (history scanned: no secrets). For now
-  **push directly to `main`**. Ruleset **`protect-main`** (active, default branch): restrict deletions + block force pushes only.
+- Repo: **github.com/Proelectro/ancc-dynamic-website**, **public since 25 Nov 2026** (history scanned: no secrets).
   Being public, the server clone no longer strictly needs a token to pull.
-- Later: a ruleset requiring a PR plus Code Owner review. Caveat: Claude's GitHub identity is **Proelectro**, the only code
-  owner, and nobody can approve their own PR. So add a second code owner, or give proelectro "pull requests only" bypass.
+- **Pull requests only (since 25 Nov 2026).** Never push to `main`. For each change: create a branch (`feat/...`, `fix/...`,
+  `docs/...`), commit, push the branch, open a PR with `gh pr create` describing what changed and why, and tell the user the
+  PR link. **The user reviews and merges; don't merge PRs yourself unless the user asks.** CI (`backend`, `frontend`) runs
+  on every PR; the `deploy` branch is only rebuilt after a merge to `main`.
+- Ruleset **`protect-main`** (default branch): require a pull request (0 approvals, because Claude's GitHub identity is
+  Proelectro, the only code owner, and nobody can approve their own PR), require the `backend` and `frontend` checks,
+  restrict deletions, block force pushes. Code Owner review can be turned on once there's a second code owner.
 - Commit messages end with the attribution lines the session provides (Co-Authored-By / Claude-Session).
 - Never commit `backend/config.php`, the server's config, or anything from `/var/www/ancc/README`.
 
@@ -125,7 +129,7 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
   No DOB is collected, so the eligibility check uses the studies start year and shows "needs check" otherwise. There's an issues
   loop ("email not found", etc.) and a registration worksheet with copy buttons for the ICPC admin. No coach role.
 - **Event photos:** from the ANCC Google Drive folder link (synced via the Drive API), not uploaded to the server.
-- **Merging:** only proelectro may merge to `main` (CODEOWNERS `* @proelectro`) once PR rules are on.
+- **Merging:** only proelectro merges to `main`, through pull requests (CODEOWNERS `* @proelectro`).
 
 ## Status and next steps
 
