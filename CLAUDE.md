@@ -97,8 +97,9 @@ install PHPUnit with `apt-get install phpunit` and run `phpunit` from `backend/`
 
 ## Git workflow (current)
 
-- Repo: **github.com/Proelectro/ancc-dynamic-website**. For now **push directly to `main`** (the user's choice for the
-  first few commits). Only "block force pushes" and "restrict deletions" are planned on `main` meanwhile.
+- Repo: **github.com/Proelectro/ancc-dynamic-website**, **public since 25 Nov 2026** (history scanned: no secrets). For now
+  **push directly to `main`**. Ruleset **`protect-main`** (active, default branch): restrict deletions + block force pushes only.
+  Being public, the server clone no longer strictly needs a token to pull.
 - Later: a ruleset requiring a PR plus Code Owner review. Caveat: Claude's GitHub identity is **Proelectro**, the only code
   owner, and nobody can approve their own PR. So add a second code owner, or give proelectro "pull requests only" bypass.
 - Commit messages end with the attribution lines the session provides (Co-Authored-By / Claude-Session).
